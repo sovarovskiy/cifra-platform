@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { ensureAdminSeed } from "@/lib/store";
+import {
+  canWriteStoreForDebug,
+  ensureAdminSeed,
+  getResolvedStorePathForDebug,
+} from "@/lib/store";
 
 export async function GET() {
   try {
@@ -8,6 +12,11 @@ export async function GET() {
       ok: true,
       adminConfigured: !!process.env.ADMIN_EMAIL,
       hasSecret: !!process.env.SESSION_SECRET,
+      vercel: process.env.VERCEL ?? null,
+      vercelEnv: process.env.VERCEL_ENV ?? null,
+      vercelSha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
+      storePath: getResolvedStorePathForDebug(),
+      storeWritable: canWriteStoreForDebug(),
     });
   } catch (e) {
     return NextResponse.json(

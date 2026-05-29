@@ -62,6 +62,25 @@ function resolveStorePath(): string {
   }
 }
 
+export function getResolvedStorePathForDebug(): string {
+  return resolveStorePath();
+}
+
+export function canWriteStoreForDebug(): { ok: boolean; path: string; error?: string } {
+  const p = resolveStorePath();
+  try {
+    const dir = path.dirname(p);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const probe = `${p}.probe`;
+    fs.writeFileSync(probe, "ok", "utf-8");
+    fs.unlinkSync(probe);
+    return { ok: true, path: p };
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException;
+    return { ok: false, path: p, error: err.code ? `${err.code}: ${err.message}` : String(err) };
+  }
+}
+
 function readStore(): StoreData {
   const storePath = resolveStorePath();
   try {
