@@ -401,16 +401,8 @@ export function CallWizard() {
         </div>
       </div>
 
-      <div className="content-card flex-1">
-        <div className="script-block">
-          <span className="script-quote-mark" aria-hidden>
-            &ldquo;
-          </span>
-          <p className="script-text">{displayText}</p>
-          <span className="script-quote-mark script-quote-mark--end" aria-hidden>
-            &rdquo;
-          </span>
-        </div>
+      <div className="content-card wizard-card flex-1">
+        <p className="script-text">{displayText}</p>
         {step.hint && <p className="text-hint mt-4 italic">{step.hint}</p>}
 
         {step.input && (
@@ -443,31 +435,31 @@ export function CallWizard() {
             )}
           </div>
         )}
-      </div>
 
-      {step.answers && (
-        <div className="mt-4 flex flex-col gap-3">
-          {step.answers.map((a) => (
-            <button
-              key={a.id}
-              type="button"
-              className={answerButtonClass(a)}
-              onClick={() => goNext(a)}
-            >
-              {a.label}
-            </button>
-          ))}
-          {step.id === "budget_main" && (
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => goToStep("budget_fallback", state, true)}
-            >
-              Клиент не назвал сумму / затрудняется
-            </button>
-          )}
-        </div>
-      )}
+        {step.answers && (
+          <div className="mt-6 flex flex-col gap-3">
+            {step.answers.map((a) => (
+              <button
+                key={a.id}
+                type="button"
+                className={answerButtonClass(a)}
+                onClick={() => goNext(a)}
+              >
+                {a.label}
+              </button>
+            ))}
+            {step.id === "budget_main" && (
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={() => goToStep("budget_fallback", state, true)}
+              >
+                Клиент не назвал сумму / затрудняется
+              </button>
+            )}
+          </div>
+        )}
+      </div>
 
       {canGoBack && (
         <button type="button" className="link-back" onClick={goBack}>

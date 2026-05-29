@@ -118,7 +118,7 @@ export function AdminEmails() {
 
       <ul className="content-card divide-y divide-[#E2E8F0] overflow-hidden p-0">
         {emails.length === 0 && (
-          <li className="px-4 py-6 text-center text-sm text-slate-500">
+          <li className="px-4 py-6 text-center text-sm text-muted">
             Список пуст
           </li>
         )}
@@ -137,7 +137,7 @@ export function AdminEmails() {
                     админ
                   </span>
                 )}
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="mt-0.5 text-xs text-muted">
                   с {new Date(row.created_at).toLocaleDateString("ru-RU")}
                 </p>
               </div>
