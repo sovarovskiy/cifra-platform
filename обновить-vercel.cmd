@@ -17,7 +17,7 @@ if errorlevel 1 (
 git add -A
 git diff --cached --quiet
 if errorlevel 1 (
-  git commit -m "Цифра: зелёный glass UI, скрипт, бюджет кнопками, нецелевые клиенты"
+  git commit -m "Цифра: цвета макета, итог нецелевых, glass UI"
   if errorlevel 1 (
     echo ОШИБКА: коммит не создан
     pause

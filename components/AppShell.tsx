@@ -24,7 +24,7 @@ export function AppShell({ email, isAdmin, children }: Props) {
       <header className="glass-nav sticky top-0 z-20">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-brand-600">
+            <p className="text-xs font-medium uppercase tracking-wider text-[#1F6B70]">
               Аналитическая платформа
             </p>
             <h1 className="text-lg font-bold text-slate-900">Цифра</h1>

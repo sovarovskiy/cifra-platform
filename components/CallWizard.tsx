@@ -402,7 +402,7 @@ export function CallWizard() {
       </div>
 
       <div className="wizard-card p-6">
-        <p className="text-base font-medium leading-relaxed text-slate-900 whitespace-pre-wrap">
+        <p className="text-base font-medium leading-relaxed text-[#1e293b] whitespace-pre-wrap">
           {displayText}
         </p>
         {step.hint && (
