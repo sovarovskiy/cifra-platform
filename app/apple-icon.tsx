@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { ICON_GRADIENT } from "@/lib/brand-icon";
 
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
@@ -13,11 +14,12 @@ export default function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#3380fc",
+          background: ICON_GRADIENT,
           color: "white",
-          fontSize: 100,
+          fontSize: 108,
           fontWeight: 700,
           fontFamily: "system-ui, sans-serif",
+          letterSpacing: "-0.02em",
         }}
       >
         Ц

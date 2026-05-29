@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { ICON_GRADIENT } from "@/lib/brand-icon";
 
 export const size = { width: 512, height: 512 };
 export const contentType = "image/png";
@@ -13,11 +14,12 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #3380fc 0%, #1d5ff1 100%)",
+          background: ICON_GRADIENT,
           color: "white",
-          fontSize: 280,
+          fontSize: 300,
           fontWeight: 700,
           fontFamily: "system-ui, sans-serif",
+          letterSpacing: "-0.02em",
         }}
       >
         Ц

@@ -1,4 +1,4 @@
-const CACHE = "cifra-v2";
+const CACHE = "cifra-v3";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

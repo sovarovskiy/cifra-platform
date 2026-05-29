@@ -1,5 +1,5 @@
 /**
- * Генерация PNG-иконок для PWA (запуск: node scripts/generate-icons.mjs)
+ * Генерация PNG-иконок для PWA (запуск: npm run icons)
  */
 import fs from "fs";
 import path from "path";
@@ -8,6 +8,9 @@ import zlib from "zlib";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.join(__dirname, "..", "public", "icons");
+
+/** #1A535C — основной зелёный бренда */
+const BRAND_RGB = [0x1a, 0x53, 0x5c];
 
 function crc32(buf) {
   let c = ~0;
@@ -27,19 +30,13 @@ function pngChunk(type, data) {
   return Buffer.concat([len, typeBuf, data, crcBuf]);
 }
 
-function createPng(size, rgb, letter = "Ц") {
+function createPng(size, rgb) {
   const [r, g, b] = rgb;
   const raw = [];
   for (let y = 0; y < size; y++) {
     raw.push(0);
     for (let x = 0; x < size; x++) {
-      const margin = size * 0.12;
-      const inner = x > margin && y > margin && x < size - margin && y < size - margin;
-      if (inner) {
-        raw.push(r, g, b, 255);
-      } else {
-        raw.push(244, 246, 251, 255);
-      }
+      raw.push(r, g, b, 255);
     }
   }
   const compressed = zlib.deflateSync(Buffer.from(raw));
@@ -58,9 +55,8 @@ function createPng(size, rgb, letter = "Ц") {
 
 if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
-const brand = [0x33, 0x80, 0xfc];
-fs.writeFileSync(path.join(outDir, "icon-192.png"), createPng(192, brand));
-fs.writeFileSync(path.join(outDir, "icon-512.png"), createPng(512, brand));
-fs.writeFileSync(path.join(outDir, "icon-maskable-512.png"), createPng(512, brand));
+fs.writeFileSync(path.join(outDir, "icon-192.png"), createPng(192, BRAND_RGB));
+fs.writeFileSync(path.join(outDir, "icon-512.png"), createPng(512, BRAND_RGB));
+fs.writeFileSync(path.join(outDir, "icon-maskable-512.png"), createPng(512, BRAND_RGB));
 
-console.log("Icons written to public/icons/");
+console.log("Icons written to public/icons/ (green #1A535C)");
