@@ -1,9 +1,6 @@
 import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import {
-  createSessionRow,
-  deleteSessionByToken,
-  getSessionByToken,
   isAdminEmail,
   isEmailAllowed,
 } from "./store";
@@ -30,6 +27,12 @@ function signOtp(email: string, code: string, expiresAt: number): string {
     .digest("hex");
 }
 
+function signSession(email: string, deviceId: string, expiresAt: number): string {
+  return createHmac("sha256", secret())
+    .update(`${normalizeEmail(email)}:${deviceId}:${expiresAt}`)
+    .digest("hex");
+}
+
 function safeEqualHex(a: string, b: string): boolean {
   try {
     return timingSafeEqual(Buffer.from(a, "hex"), Buffer.from(b, "hex"));
@@ -49,11 +52,16 @@ export function isAdmin(email: string): boolean {
 }
 
 export function createSession(email: string, deviceId: string): string {
-  const token = randomBytes(32).toString("hex");
-  const expires = new Date();
-  expires.setDate(expires.getDate() + SESSION_DAYS);
-  createSessionRow(token, email, deviceId, expires.toISOString());
-  return token;
+  const expiresAt = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
+  const nonce = randomBytes(8).toString("hex");
+  const payload = {
+    e: normalizeEmail(email),
+    d: deviceId,
+    exp: expiresAt,
+    n: nonce,
+    sig: signSession(email, deviceId, expiresAt),
+  };
+  return Buffer.from(JSON.stringify(payload), "utf-8").toString("base64url");
 }
 
 export type SessionUser = {
@@ -66,19 +74,26 @@ export function getSessionFromToken(
   token: string,
   deviceId: string
 ): SessionUser | null {
-  const row = getSessionByToken(token);
-  if (!row) return null;
-  if (new Date(row.expires_at) < new Date()) {
-    deleteSessionByToken(token);
+  try {
+    const parsed = JSON.parse(
+      Buffer.from(token, "base64url").toString("utf-8")
+    ) as { e: string; d: string; exp: number; sig: string };
+
+    if (!parsed?.e || !parsed?.d || !parsed?.exp || !parsed?.sig) return null;
+    if (Date.now() > parsed.exp) return null;
+    if (parsed.d !== deviceId) return null;
+
+    const expected = signSession(parsed.e, parsed.d, parsed.exp);
+    if (!safeEqualHex(parsed.sig, expected)) return null;
+
+    return {
+      email: parsed.e,
+      isAdmin: isAdmin(parsed.e),
+      deviceId: parsed.d,
+    };
+  } catch {
     return null;
   }
-  if (row.device_id !== deviceId) return null;
-
-  return {
-    email: row.email,
-    isAdmin: isAdmin(row.email),
-    deviceId: row.device_id,
-  };
 }
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
