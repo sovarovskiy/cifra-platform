@@ -331,15 +331,15 @@ export function CallWizard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2 text-xs text-slate-500">
-        <span>{step.block}</span>
-        <span>{progress}%</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="wizard-block-label">{step.block}</span>
+        <span className="text-xs font-medium text-brand-700">{progress}%</span>
       </div>
       <div className="progress-track">
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      <div className="card-panel p-6">
+      <div className="wizard-card p-6">
         <p className="text-base font-medium leading-relaxed text-slate-900 whitespace-pre-wrap">
           {displayText}
         </p>
@@ -388,16 +388,20 @@ export function CallWizard() {
               <button
                 key={a.id}
                 type="button"
-                className="btn-answer"
+                className={
+                  step.id === "budget_main"
+                    ? "btn-answer-wizard btn-answer-budget"
+                    : "btn-answer-wizard"
+                }
                 onClick={() => goNext(a)}
               >
-                {a.label}
+                <span>{a.label}</span>
               </button>
             ))}
             {step.id === "budget_main" && (
               <button
                 type="button"
-                className="btn-ghost w-full text-sm"
+                className="btn-ghost-wizard w-full"
                 onClick={() => goToStep("budget_fallback", state, true)}
               >
                 Клиент не назвал сумму / затрудняется
@@ -407,7 +411,7 @@ export function CallWizard() {
         )}
 
         {canGoBack && (
-          <button type="button" className="btn-ghost mt-4 w-full" onClick={goBack}>
+          <button type="button" className="btn-ghost-wizard mt-4 w-full" onClick={goBack}>
             ← Назад
           </button>
         )}
@@ -428,8 +432,8 @@ function ResultLayout({
   canGoBack?: boolean;
 }) {
   return (
-    <div className="card-panel p-6">
-      <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+    <div className="wizard-card p-6">
+      <h2 className="text-xl font-bold text-brand-800">{title}</h2>
       <div className="mt-4">{children}</div>
       {canGoBack && onBack && (
         <button type="button" className="btn-ghost mt-4 w-full" onClick={onBack}>
