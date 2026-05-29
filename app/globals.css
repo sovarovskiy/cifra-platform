@@ -11,16 +11,13 @@
   --color-canvas: #f3f5f8;
   --color-script-text: #1e293b;
 
-  --accent-gradient: linear-gradient(
-    180deg,
-    #25878d 0%,
-    var(--color-btn) 48%,
-    var(--color-btn-active) 100%
-  );
   --shadow-wizard: 0 16px 40px rgba(31, 107, 112, 0.12),
     0 6px 20px rgba(15, 23, 42, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.85);
-  --glow-accent: 0 6px 24px rgba(31, 107, 112, 0.35);
+  --shadow-btn-float: 0 10px 28px rgba(31, 107, 112, 0.32),
+    0 4px 12px rgba(15, 23, 42, 0.1);
+  --shadow-btn-float-hover: 0 16px 40px rgba(31, 107, 112, 0.38),
+    0 6px 16px rgba(15, 23, 42, 0.12);
 }
 
 body {
@@ -141,69 +138,38 @@ body::before {
   }
 
   .btn-primary {
-    @apply relative inline-flex items-center justify-center overflow-hidden rounded-xl px-5 py-3 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50;
-    background: var(--accent-gradient);
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    box-shadow: var(--glow-accent), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    @apply inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50;
+    background: var(--color-btn);
+    border: none;
+    box-shadow: var(--shadow-btn-float);
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: linear-gradient(180deg, #2d959b 0%, var(--color-btn-hover) 100%);
-    box-shadow: 0 8px 28px rgba(31, 107, 112, 0.42),
-      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    background: var(--color-btn-hover);
+    box-shadow: var(--shadow-btn-float-hover);
+    transform: translateY(-2px);
   }
 
-  .btn-primary::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 10%;
-    right: 10%;
-    height: 48%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, transparent 100%);
-    pointer-events: none;
-    border-radius: 0 0 50% 50%;
-  }
-
-  /* Кнопки ответов — #1F6B70 */
+  /* Кнопки ответов — #1F6B70, без бликов */
   .btn-answer-wizard {
-    @apply relative w-full overflow-hidden rounded-xl px-4 py-3.5 text-left text-sm font-semibold text-white transition active:scale-[0.99];
-    background: var(--accent-gradient);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    box-shadow: 0 6px 20px rgba(31, 107, 112, 0.28),
-      inset 0 1px 0 rgba(255, 255, 255, 0.28),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.08);
-  }
-
-  .btn-answer-wizard::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 6%;
-    right: 6%;
-    height: 42%;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, transparent 100%);
-    pointer-events: none;
-    z-index: 1;
-    border-radius: 0 0 40% 40%;
+    @apply w-full rounded-xl px-4 py-3.5 text-left text-sm font-semibold text-white transition active:scale-[0.99];
+    background: var(--color-btn);
+    border: none;
+    box-shadow: var(--shadow-btn-float);
   }
 
   .btn-answer-wizard span {
-    position: relative;
-    z-index: 2;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+    display: block;
   }
 
   .btn-answer-wizard:hover {
-    background: linear-gradient(180deg, #2d959b 0%, var(--color-btn-hover) 100%);
-    box-shadow: 0 8px 26px rgba(31, 107, 112, 0.38),
-      inset 0 1px 0 rgba(255, 255, 255, 0.35);
-    transform: translateY(-1px);
+    background: var(--color-btn-hover);
+    box-shadow: var(--shadow-btn-float-hover);
+    transform: translateY(-2px);
   }
 
   .btn-answer-budget {
-    box-shadow: 0 8px 24px rgba(31, 107, 112, 0.32),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-btn-float-hover);
   }
 
   .btn-ghost {
@@ -233,10 +199,10 @@ body::before {
   }
 
   .nav-link-active {
-    background: var(--accent-gradient);
+    background: var(--color-btn);
     @apply text-white;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: var(--glow-accent);
+    border: none;
+    box-shadow: var(--shadow-btn-float);
   }
 
   .glass-input {
@@ -263,8 +229,7 @@ body::before {
   .progress-fill {
     @apply h-full rounded-full transition-all;
     background: var(--color-btn);
-    box-shadow: 0 0 10px rgba(31, 107, 112, 0.45),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 8px rgba(31, 107, 112, 0.35);
   }
 
   .wizard-block-label {
