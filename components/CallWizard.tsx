@@ -306,7 +306,7 @@ export function CallWizard() {
             </button>
             <button
               type="button"
-              className="btn-choice btn-choice-secondary"
+              className="btn-secondary"
               onClick={() => window.location.reload()}
             >
               Новый звонок
@@ -377,7 +377,7 @@ export function CallWizard() {
           </button>
           <button
             type="button"
-            className="btn-choice btn-choice-secondary"
+            className="btn-secondary"
             onClick={() => window.location.reload()}
           >
             Новый звонок
@@ -391,20 +391,30 @@ export function CallWizard() {
 
   return (
     <div className="flex min-h-[calc(100dvh-5.5rem)] flex-col">
-      <div className="progress-row">
+      <div className="wizard-progress">
+        <div className="progress-row">
+          <span className="text-step-label">{step.block}</span>
+          <span className="progress-pct">{progress}%</span>
+        </div>
         <div className="progress-track">
           <div className="progress-fill" style={{ width: `${progress}%` }} />
         </div>
-        <span className="progress-pct">{progress}%</span>
       </div>
 
-      <div className="content-card flex flex-1 flex-col">
-        <p className="text-step-label">{step.block}</p>
-        <p className="text-question mt-4 whitespace-pre-wrap">{displayText}</p>
-        {step.hint && <p className="text-hint mt-3 italic">{step.hint}</p>}
+      <div className="content-card flex-1">
+        <div className="script-block">
+          <span className="script-quote-mark" aria-hidden>
+            &ldquo;
+          </span>
+          <p className="script-text">{displayText}</p>
+          <span className="script-quote-mark script-quote-mark--end" aria-hidden>
+            &rdquo;
+          </span>
+        </div>
+        {step.hint && <p className="text-hint mt-4 italic">{step.hint}</p>}
 
         {step.input && (
-          <div className="mt-8 flex flex-col gap-3">
+          <div className="mt-6 flex flex-col gap-3">
             <input
               type={step.input === "number" ? "number" : "text"}
               inputMode={
@@ -425,7 +435,7 @@ export function CallWizard() {
             {step.optional && (
               <button
                 type="button"
-                className="btn-choice btn-choice-secondary"
+                className="btn-secondary"
                 onClick={() => goNext(null, "")}
               >
                 Пропустить
@@ -433,31 +443,31 @@ export function CallWizard() {
             )}
           </div>
         )}
-
-        {step.answers && (
-          <div className="mt-8 flex flex-col gap-3">
-            {step.answers.map((a) => (
-              <button
-                key={a.id}
-                type="button"
-                className={answerButtonClass(a, step.id)}
-                onClick={() => goNext(a)}
-              >
-                {a.label}
-              </button>
-            ))}
-            {step.id === "budget_main" && (
-              <button
-                type="button"
-                className="btn-choice btn-choice-secondary"
-                onClick={() => goToStep("budget_fallback", state, true)}
-              >
-                Клиент не назвал сумму / затрудняется
-              </button>
-            )}
-          </div>
-        )}
       </div>
+
+      {step.answers && (
+        <div className="mt-4 flex flex-col gap-3">
+          {step.answers.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              className={answerButtonClass(a)}
+              onClick={() => goNext(a)}
+            >
+              {a.label}
+            </button>
+          ))}
+          {step.id === "budget_main" && (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => goToStep("budget_fallback", state, true)}
+            >
+              Клиент не назвал сумму / затрудняется
+            </button>
+          )}
+        </div>
+      )}
 
       {canGoBack && (
         <button type="button" className="link-back" onClick={goBack}>

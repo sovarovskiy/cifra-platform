@@ -97,7 +97,7 @@ export function AdminEmails() {
               required
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              className="glass-input mt-1"
+              className="field-input mt-1"
               placeholder="manager@company.ru"
             />
           </label>
@@ -155,7 +155,7 @@ export function AdminEmails() {
                   type="button"
                   disabled={busy}
                   onClick={() => remove(row.email)}
-                  className="rounded-lg px-3 py-1.5 text-red-600 hover:bg-red-50 disabled:opacity-50"
+                  className="btn-danger-text disabled:opacity-50"
                 >
                   Удалить
                 </button>

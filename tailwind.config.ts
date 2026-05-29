@@ -13,7 +13,7 @@ const config: Config = {
           600: "#16484f",
           700: "#123d43",
         },
-        canvas: "#F8F9FA",
+        canvas: "#0F2427",
         ink: "#1A202C",
         muted: "#718096",
         danger: "#A63A50",

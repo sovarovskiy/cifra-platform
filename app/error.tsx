@@ -18,7 +18,7 @@ export default function Error({
         <button type="button" className="btn-primary mt-6" onClick={reset}>
           Повторить
         </button>
-        <a href="/login" className="btn-ghost mt-2 block text-sm">
+        <a href="/login" className="btn-secondary mt-3">
           На страницу входа
         </a>
       </div>

@@ -122,7 +122,7 @@ export function LoginForm() {
             </button>
             <button
               type="button"
-              className="btn-choice btn-choice-secondary w-full"
+              className="btn-secondary"
               onClick={() => {
                 setStep("email");
                 setCode("");

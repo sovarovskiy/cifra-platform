@@ -40,7 +40,7 @@ function LoginContent() {
       )}
 
       {!standalone && !showLogin && (
-        <p className="mt-4 text-center text-xs text-slate-500">
+        <p className="mt-4 text-center text-xs text-white/50">
           После установки откройте приложение «Цифра» с главного экрана.
         </p>
       )}
@@ -53,7 +53,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
       <Suspense
         fallback={
-          <div className="card-panel p-8 text-center text-sm text-slate-500">
+          <div className="card-panel p-8 text-center text-sm text-muted">
             Загрузка…
           </div>
         }
