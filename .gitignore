@@ -1,0 +1,8 @@
+node_modules
+.next
+data/*.db
+data/store.json
+.env
+.env.local
+*.log
+build-log.txt

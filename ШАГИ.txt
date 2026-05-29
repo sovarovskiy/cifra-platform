@@ -1,0 +1,46 @@
+═══════════════════════════════════════════════════════════════
+  ПУБЛИКАЦИЯ «ЦИФРА» — СТРОГО ПО ПОРЯДКУ
+═══════════════════════════════════════════════════════════════
+
+ШАГ 0. Закройте лишние окна терминала. Откройте НОВОЕ:
+        Пуск → «cmd» → Enter (чёрное окно, НЕ PowerShell)
+
+ШАГ 1. Дважды щёлкните файл:
+        C:\Users\Windows\cifra-platform\шаг1-git.cmd
+        (введите имя и email когда спросит)
+
+ШАГ 2. Дважды щёлкните:
+        C:\Users\Windows\cifra-platform\шаг2-github.cmd
+        (следуйте подсказкам в окне)
+
+ШАГ 3. Сайт в интернете (для ссылки менеджерам):
+        • Откройте https://vercel.com
+        • Войти через GitHub
+        • Add New → Project → выберите cifra-platform
+        • Environment Variables:
+            ADMIN_EMAIL = sovarovsky@gmail.com
+            SESSION_SECRET = любая-длинная-строка-32-символа
+        • Deploy
+        • Скопируйте ссылку https://....vercel.app
+
+ШАГ 4. На телефоне откройте эту ссылку → «Установить приложение»
+
+═══════════════════════════════════════════════════════════════
+  Если шаг 2 не получается — см. «ЗАПАСНОЙ ВАРИАНТ» в конце файла
+═══════════════════════════════════════════════════════════════
+
+ЗАПАСНОЙ ВАРИАНТ (без gh — только браузер)
+
+1. https://github.com/new
+2. Имя репозитория: cifra-platform
+3. Public → Create repository (БЕЗ README)
+4. В cmd выполните (замените USER на ваш логин GitHub):
+
+   cd /d C:\Users\Windows\cifra-platform
+   git remote add origin https://github.com/USER/cifra-platform.git
+   git push -u origin main
+
+   (GitHub попросит логин — используйте Personal Access Token вместо пароля)
+   Токен: GitHub → Settings → Developer settings → Personal access tokens
+
+═══════════════════════════════════════════════════════════════
