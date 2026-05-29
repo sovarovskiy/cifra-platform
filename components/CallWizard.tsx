@@ -232,7 +232,8 @@ export function CallWizard() {
     return { funnel, priority, segment, phrase, jtbd: jtbdResolved, jtbdTitle: jtbd?.title };
   }, [finished, state]);
 
-  const canGoBack = history.length > 1 && !finished && !nonTarget;
+  const showWizardBack =
+    stepId !== START_STEP && history.length > 1 && !finished && !nonTarget;
 
   if (nonTarget) {
     const ntResult = calculateNonTargetResult(nonTarget, state);
@@ -406,7 +407,7 @@ export function CallWizard() {
         {step.hint && <p className="text-hint mt-4 italic">{step.hint}</p>}
 
         {step.input && (
-          <div className="mt-6 flex flex-col gap-3">
+          <div className="wizard-actions">
             <input
               type={step.input === "number" ? "number" : "text"}
               inputMode={
@@ -421,13 +422,13 @@ export function CallWizard() {
               placeholder={step.inputPlaceholder}
               className="field-input"
             />
-            <button type="button" className="btn-primary" onClick={() => goNext(null)}>
+            <button type="button" className="btn-wizard" onClick={() => goNext(null)}>
               Далее
             </button>
             {step.optional && (
               <button
                 type="button"
-                className="btn-secondary"
+                className="btn-wizard btn-wizard--muted"
                 onClick={() => goNext(null, "")}
               >
                 Пропустить
@@ -437,12 +438,12 @@ export function CallWizard() {
         )}
 
         {step.answers && (
-          <div className="mt-6 flex flex-col gap-3">
+          <div className="wizard-actions">
             {step.answers.map((a) => (
               <button
                 key={a.id}
                 type="button"
-                className={answerButtonClass(a)}
+                className={answerButtonClass(a, step.answers)}
                 onClick={() => goNext(a)}
               >
                 {a.label}
@@ -451,7 +452,7 @@ export function CallWizard() {
             {step.id === "budget_main" && (
               <button
                 type="button"
-                className="btn-secondary"
+                className="btn-wizard btn-wizard--muted"
                 onClick={() => goToStep("budget_fallback", state, true)}
               >
                 Клиент не назвал сумму / затрудняется
@@ -461,8 +462,8 @@ export function CallWizard() {
         )}
       </div>
 
-      {canGoBack && (
-        <button type="button" className="link-back" onClick={goBack}>
+      {showWizardBack && (
+        <button type="button" className="btn-wizard-back" onClick={goBack}>
           <ArrowLeft size={16} strokeWidth={2} aria-hidden />
           Назад
         </button>
