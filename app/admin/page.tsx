@@ -11,7 +11,7 @@ export default async function AdminPage() {
   if (!user.isAdmin) redirect("/");
 
   return (
-    <AppShell email={user.email} isAdmin={user.isAdmin}>
+    <AppShell isAdmin={user.isAdmin}>
       <AdminEmails />
     </AppShell>
   );

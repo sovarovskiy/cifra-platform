@@ -16,7 +16,7 @@ export default async function HomePage() {
   if (!user) redirect("/login");
 
   return (
-    <AppShell email={user.email} isAdmin={user.isAdmin}>
+    <AppShell isAdmin={user.isAdmin}>
       <CallWizard />
     </AppShell>
   );

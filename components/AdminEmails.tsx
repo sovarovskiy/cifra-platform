@@ -77,9 +77,9 @@ export function AdminEmails() {
 
   return (
     <div className="space-y-6">
-      <div className="card-panel p-6">
-        <h2 className="text-lg font-bold">Разрешённые почты</h2>
-        <p className="mt-1 text-sm text-slate-600">
+      <div className="content-card">
+        <h2 className="text-brand-title text-lg">Разрешённые почты</h2>
+        <p className="text-hint mt-2">
           Добавляйте менеджеров, меняйте роль (админ / пользователь) и удаляйте
           доступ. Главного администратора из настроек сервера удалить нельзя.
         </p>
@@ -113,10 +113,10 @@ export function AdminEmails() {
             Добавить
           </button>
         </form>
-        {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-2 text-sm text-danger">{error}</p>}
       </div>
 
-      <ul className="card-panel divide-y divide-surface-muted overflow-hidden">
+      <ul className="content-card divide-y divide-[#E2E8F0] overflow-hidden p-0">
         {emails.length === 0 && (
           <li className="px-4 py-6 text-center text-sm text-slate-500">
             Список пуст
@@ -133,7 +133,7 @@ export function AdminEmails() {
               <div>
                 <span className="font-medium">{row.email}</span>
                 {isAdmin && (
-                  <span className="ml-2 rounded-md bg-brand-100 px-2 py-0.5 text-xs text-brand-800">
+                  <span className="ml-2 rounded-md bg-[#E5ECEC] px-2 py-0.5 text-xs font-medium text-brand">
                     админ
                   </span>
                 )}

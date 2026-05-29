@@ -64,54 +64,47 @@ export function LoginForm() {
       setError(data.error ?? `Ошибка ${res.status}`);
       return;
     }
-    // Полная перезагрузка — чтобы cookies точно подхватились сервером
     window.location.href = "/";
   }
 
   return (
-    <div className="mx-auto w-full max-w-md">
-      <div className="card-panel p-8">
-        <p className="text-xs font-semibold uppercase tracking-wider text-brand-600">
-          Аналитическая платформа
-        </p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">Цифра</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Вход по корпоративной почте из списка разрешённых адресов
-        </p>
+    <div className="mx-auto w-full max-w-lg">
+      <div className="content-card p-6">
+        <p className="text-eyebrow">Аналитическая платформа</p>
+        <h1 className="text-brand-title mt-1">Цифра</h1>
+        <p className="text-hint mt-2">Вход по корпоративной почте из списка разрешённых</p>
 
         {step === "email" ? (
-          <form onSubmit={requestCode} className="mt-6 space-y-4">
+          <form onSubmit={requestCode} className="mt-8 space-y-4">
             <label className="block">
-              <span className="text-sm font-medium text-slate-700">Email</span>
+              <span className="text-sm font-medium text-ink">Email</span>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="glass-input mt-1"
+                className="field-input mt-2"
                 placeholder="name@company.ru"
               />
             </label>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
             <button type="submit" disabled={loading} className="btn-primary w-full">
               {loading ? "Отправка…" : "Получить код"}
             </button>
           </form>
         ) : (
-          <form onSubmit={verify} className="mt-6 space-y-4">
-            <p className="text-sm text-slate-600">
+          <form onSubmit={verify} className="mt-8 space-y-4">
+            <p className="text-sm text-ink">
               Код для <strong>{email}</strong>
             </p>
-            {info && (
-              <p className="glass-inset rounded-lg px-3 py-2 text-xs text-brand-800">{info}</p>
-            )}
+            {info && <p className="panel-inset text-xs text-brand">{info}</p>}
             {devCode && (
-              <p className="rounded-xl bg-slate-900 px-4 py-3 text-center text-2xl font-bold tracking-[0.3em] text-white">
+              <p className="rounded-[14px] bg-brand px-4 py-3 text-center text-2xl font-bold tracking-[0.3em] text-white">
                 {devCode}
               </p>
             )}
             <label className="block">
-              <span className="text-sm font-medium text-slate-700">Код из 6 цифр</span>
+              <span className="text-sm font-medium text-ink">Код из 6 цифр</span>
               <input
                 type="text"
                 inputMode="numeric"
@@ -120,26 +113,27 @@ export function LoginForm() {
                 required
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="glass-input mt-1 text-center text-lg tracking-widest"
+                className="field-input mt-2 text-center text-lg tracking-widest"
               />
             </label>
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
             <button type="submit" disabled={loading} className="btn-primary w-full">
               {loading ? "Вход…" : "Войти"}
             </button>
             <button
               type="button"
-              className="btn-ghost w-full"
-              onClick={() => setStep("email")}
+              className="btn-choice btn-choice-secondary w-full"
+              onClick={() => {
+                setStep("email");
+                setCode("");
+                setError("");
+              }}
             >
               Другой email
             </button>
           </form>
         )}
       </div>
-      <p className="mt-4 text-center text-xs text-slate-500">
-        Один аккаунт — одно устройство. Новый вход завершит сессию на предыдущем.
-      </p>
     </div>
   );
 }

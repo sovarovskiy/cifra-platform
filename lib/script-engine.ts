@@ -7,6 +7,8 @@ export type AnswerOption = {
   patch?: Partial<QualificationState>;
   next?: string;
   endFlow?: "non_target_a" | "non_target_b" | "non_target_c";
+  /** primary = «Да», secondary = «Нет» / второстепенное */
+  variant?: "primary" | "secondary";
 };
 
 export type ScriptStep = {
@@ -84,10 +86,11 @@ export const SCRIPT_STEPS: ScriptStep[] = [
       "«(Имя), добрый день! Меня зовут {{managerName}}, компания «Ориентир», специалист проектно-сметного отдела. Мне передали ваш контакт / вы оставляли заявку. Подтвердите: вам требуется огнезащита металлоконструкций?»",
     hint: "(Клиент отвечает, скорее всего, «да» - это первое согласие).",
     answers: [
-      { id: "yes", label: "Да", patch: { hasOgzInterest: true }, next: "open_2" },
+      { id: "yes", label: "Да", variant: "primary", patch: { hasOgzInterest: true }, next: "open_2" },
       {
         id: "no",
         label: "Нет, огнезащита не требуется",
+        variant: "secondary",
         patch: { hasOgzInterest: false },
         endFlow: "non_target_b",
       },

@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { KeyRound, LogOut, Phone } from "lucide-react";
 
 type Props = {
-  email: string;
   isAdmin: boolean;
   children: React.ReactNode;
 };
 
-export function AppShell({ email, isAdmin, children }: Props) {
+export function AppShell({ isAdmin, children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -20,38 +20,45 @@ export function AppShell({ email, isAdmin, children }: Props) {
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="glass-nav sticky top-0 z-20">
-        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
+    <div className="min-h-screen bg-canvas">
+      <header className="app-header">
+        <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-[#1F6B70]">
-              Аналитическая платформа
-            </p>
-            <h1 className="text-lg font-bold text-slate-900">Цифра</h1>
+            <p className="text-eyebrow">Аналитическая платформа</p>
+            <h1 className="text-brand-title">Цифра</h1>
           </div>
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-3" aria-label="Навигация">
             <Link
               href="/"
-              className={`btn-ghost ${pathname === "/" ? "nav-link-active" : ""}`}
+              className={`header-icon-btn ${pathname === "/" ? "header-icon-btn--active" : ""}`}
+              aria-label="Звонок"
+              title="Звонок"
             >
-              Звонок
+              <Phone size={20} strokeWidth={2} />
             </Link>
             {isAdmin && (
               <Link
                 href="/admin"
-                className={`btn-ghost ${pathname === "/admin" ? "nav-link-active" : ""}`}
+                className={`header-icon-btn ${pathname === "/admin" ? "header-icon-btn--active" : ""}`}
+                aria-label="Доступ"
+                title="Доступ"
               >
-                Доступ
+                <KeyRound size={20} strokeWidth={2} />
               </Link>
             )}
-            <span className="hidden text-xs text-slate-500 sm:inline">{email}</span>
-            <button type="button" onClick={logout} className="btn-ghost text-red-600">
-              Выйти
+            <button
+              type="button"
+              onClick={logout}
+              className="header-icon-btn--logout flex items-center justify-center"
+              aria-label="Выйти"
+              title="Выйти"
+            >
+              <LogOut size={20} strokeWidth={2} />
             </button>
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl px-4 py-6">{children}</main>
+      <main className="mx-auto max-w-lg px-4 pb-8 pt-4">{children}</main>
     </div>
   );
 }

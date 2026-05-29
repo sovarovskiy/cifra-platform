@@ -22,6 +22,8 @@ import {
   SEGMENT_PHRASES,
 } from "@/lib/scoring";
 import jtbdData from "@/data/jtbd.json";
+import { answerButtonClass } from "@/lib/answer-button";
+import { ArrowLeft } from "lucide-react";
 
 const START_STEP = "ctx_source";
 const MANAGER_NAME_KEY = "cifra_manager_name";
@@ -244,12 +246,10 @@ export function CallWizard() {
         onBack={goBack}
         canGoBack={history.length > 1}
       >
-        <p className="text-sm font-medium text-brand-700">
-          {NON_TARGET_MODULE.title}
-        </p>
-        <p className="mt-1 text-xs text-slate-600">{NON_TARGET_MODULE.description}</p>
+        <p className="text-sm font-semibold text-brand">{NON_TARGET_MODULE.title}</p>
+        <p className="text-hint mt-1">{NON_TARGET_MODULE.description}</p>
 
-        <div className="glass-speech glass-speech-warn mt-4 rounded-xl p-4">
+        <div className="glass-speech glass-speech-warn mt-4">
           <h3 className="text-sm font-bold text-slate-900">
             {ntResult.situationTitle}
           </h3>
@@ -257,14 +257,12 @@ export function CallWizard() {
           <p className="mt-3 text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
             {phrase}
           </p>
-          <p className="mt-2 text-xs font-semibold text-brand-600">
-            Проговорите клиенту ↑
-          </p>
+          <p className="mt-2 text-xs font-semibold text-brand">Проговорите клиенту ↑</p>
         </div>
 
         <section className="mt-6 space-y-4">
-          <div className="glass-inset rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-brand-700">Воронка CRM</h3>
+          <div className="panel-inset">
+            <h3 className="text-sm font-semibold text-brand">Воронка CRM</h3>
             <p className="mt-1 text-xl font-bold text-slate-900">
               {ntResult.funnelLabel}
             </p>
@@ -275,7 +273,7 @@ export function CallWizard() {
             </ul>
           </div>
 
-          <div className="glass-inset rounded-xl border-red-200/50 p-4">
+          <div className="panel-inset border-red-200/60">
             <h3 className="text-sm font-semibold text-slate-800">Приоритет работы</h3>
             <p className="mt-1 text-lg font-bold text-red-800">
               {ntResult.priorityLabel}
@@ -290,13 +288,13 @@ export function CallWizard() {
             </p>
           </div>
 
-          <div className="glass-inset rounded-xl p-4">
+          <div className="panel-inset">
             <h3 className="text-sm font-semibold text-slate-800">Сегмент</h3>
             <p className="mt-1 text-sm text-slate-700">{ntResult.segment}</p>
           </div>
 
           <CrmSummary state={state} />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-3">
             <button
               type="button"
               className="btn-primary"
@@ -308,7 +306,7 @@ export function CallWizard() {
             </button>
             <button
               type="button"
-              className="btn-ghost"
+              className="btn-choice btn-choice-secondary"
               onClick={() => window.location.reload()}
             >
               Новый звонок
@@ -323,8 +321,8 @@ export function CallWizard() {
     return (
       <ResultLayout title="Итог квалификации" onBack={goBack} canGoBack={history.length > 1}>
         <section className="space-y-4">
-          <div className="glass-inset rounded-xl p-4">
-            <h3 className="text-sm font-semibold text-brand-700">Воронка CRM</h3>
+          <div className="panel-inset">
+            <h3 className="text-sm font-semibold text-brand">Воронка CRM</h3>
             <p className="mt-1 text-xl font-bold text-slate-900">{results.funnel.funnelLabel}</p>
             {results.funnel.block && (
               <p className="text-xs text-slate-600">{results.funnel.block}</p>
@@ -337,7 +335,7 @@ export function CallWizard() {
           </div>
 
           <div
-            className={`glass-inset rounded-xl p-4 ${
+            className={`panel-inset ${
               results.priority.priority === "urgent"
                 ? "border-emerald-200/60"
                 : results.priority.priority === "dont"
@@ -354,7 +352,7 @@ export function CallWizard() {
             </ul>
           </div>
 
-          <div className="glass-inset rounded-xl p-4">
+          <div className="panel-inset">
             <h3 className="text-sm font-semibold">Сегмент JTBD: {results.segment}</h3>
             {results.jtbdTitle && (
               <p className="text-sm text-slate-600">{results.jtbdTitle}</p>
@@ -363,7 +361,7 @@ export function CallWizard() {
               <p className="mt-2 text-sm text-slate-800">{results.jtbd.mainTask}</p>
             )}
             {results.phrase && (
-              <p className="glass-inset mt-3 rounded-lg p-3 text-sm italic leading-relaxed">
+              <p className="panel-inset mt-3 text-sm italic leading-relaxed">
                 {results.phrase}
               </p>
             )}
@@ -379,7 +377,7 @@ export function CallWizard() {
           </button>
           <button
             type="button"
-            className="btn-ghost ml-2"
+            className="btn-choice btn-choice-secondary"
             onClick={() => window.location.reload()}
           >
             Новый звонок
@@ -392,25 +390,21 @@ export function CallWizard() {
   if (!step) return <p>Шаг не найден</p>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
-        <span className="wizard-block-label">{step.block}</span>
-        <span className="text-xs font-medium text-brand-700">{progress}%</span>
-      </div>
-      <div className="progress-track">
-        <div className="progress-fill" style={{ width: `${progress}%` }} />
+    <div className="flex min-h-[calc(100dvh-5.5rem)] flex-col">
+      <div className="progress-row">
+        <div className="progress-track">
+          <div className="progress-fill" style={{ width: `${progress}%` }} />
+        </div>
+        <span className="progress-pct">{progress}%</span>
       </div>
 
-      <div className="wizard-card p-6">
-        <p className="text-base font-medium leading-relaxed text-[#1e293b] whitespace-pre-wrap">
-          {displayText}
-        </p>
-        {step.hint && (
-          <p className="mt-3 text-xs leading-relaxed text-slate-500">{step.hint}</p>
-        )}
+      <div className="content-card flex flex-1 flex-col">
+        <p className="text-step-label">{step.block}</p>
+        <p className="text-question mt-4 whitespace-pre-wrap">{displayText}</p>
+        {step.hint && <p className="text-hint mt-3 italic">{step.hint}</p>}
 
         {step.input && (
-          <div className="mt-6 space-y-2">
+          <div className="mt-8 flex flex-col gap-3">
             <input
               type={step.input === "number" ? "number" : "text"}
               inputMode={
@@ -423,19 +417,15 @@ export function CallWizard() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={step.inputPlaceholder}
-              className="glass-input"
+              className="field-input"
             />
-            <button
-              type="button"
-              className="btn-primary w-full"
-              onClick={() => goNext(null)}
-            >
+            <button type="button" className="btn-primary" onClick={() => goNext(null)}>
               Далее
             </button>
             {step.optional && (
               <button
                 type="button"
-                className="btn-ghost w-full text-sm"
+                className="btn-choice btn-choice-secondary"
                 onClick={() => goNext(null, "")}
               >
                 Пропустить
@@ -445,25 +435,21 @@ export function CallWizard() {
         )}
 
         {step.answers && (
-          <div className="mt-6 flex flex-col gap-2">
+          <div className="mt-8 flex flex-col gap-3">
             {step.answers.map((a) => (
               <button
                 key={a.id}
                 type="button"
-                className={
-                  step.id === "budget_main"
-                    ? "btn-answer-wizard btn-answer-budget"
-                    : "btn-answer-wizard"
-                }
+                className={answerButtonClass(a, step.id)}
                 onClick={() => goNext(a)}
               >
-                <span>{a.label}</span>
+                {a.label}
               </button>
             ))}
             {step.id === "budget_main" && (
               <button
                 type="button"
-                className="btn-ghost-wizard w-full"
+                className="btn-choice btn-choice-secondary"
                 onClick={() => goToStep("budget_fallback", state, true)}
               >
                 Клиент не назвал сумму / затрудняется
@@ -471,13 +457,14 @@ export function CallWizard() {
             )}
           </div>
         )}
-
-        {canGoBack && (
-          <button type="button" className="btn-ghost-wizard mt-4 w-full" onClick={goBack}>
-            ← Назад
-          </button>
-        )}
       </div>
+
+      {canGoBack && (
+        <button type="button" className="link-back" onClick={goBack}>
+          <ArrowLeft size={16} strokeWidth={2} aria-hidden />
+          Назад
+        </button>
+      )}
     </div>
   );
 }
@@ -494,12 +481,13 @@ function ResultLayout({
   canGoBack?: boolean;
 }) {
   return (
-    <div className="wizard-card p-6">
-      <h2 className="text-xl font-bold text-brand-800">{title}</h2>
+    <div className="content-card">
+      <h2 className="text-brand-title">{title}</h2>
       <div className="mt-4">{children}</div>
       {canGoBack && onBack && (
-        <button type="button" className="btn-ghost-wizard mt-4 w-full" onClick={onBack}>
-          ← Назад
+        <button type="button" className="link-back mt-6" onClick={onBack}>
+          <ArrowLeft size={16} strokeWidth={2} aria-hidden />
+          Назад
         </button>
       )}
     </div>
@@ -528,7 +516,7 @@ function CrmSummary({ state }: { state: QualificationState }) {
     ["Сегмент", state.segment ?? "—"],
   ];
   return (
-    <div className="glass-inset rounded-xl p-4">
+    <div className="panel-inset">
       <h3 className="text-sm font-semibold">Параметры для CRM</h3>
       <dl className="mt-2 grid gap-1 text-sm">
         {rows.map(([k, v]) => (
