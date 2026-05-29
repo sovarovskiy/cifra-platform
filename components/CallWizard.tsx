@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   applyPatch,
+  formatManagerText,
   getStep,
   NON_TARGET_TEXTS,
   resolveNext,
@@ -19,6 +20,7 @@ import {
 import jtbdData from "@/data/jtbd.json";
 
 const START_STEP = "ctx_source";
+const MANAGER_NAME_KEY = "cifra_manager_name";
 
 type JtbdEntry = {
   title: string;
@@ -27,11 +29,38 @@ type JtbdEntry = {
   inherits?: string;
 };
 
+type HistoryEntry = {
+  stepId: string;
+  state: QualificationState;
+  inputValue: string;
+};
+
+function initialState(): QualificationState {
+  const base: QualificationState = { hasOgzInterest: true };
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem(MANAGER_NAME_KEY);
+    if (saved) base.managerName = saved;
+  }
+  return base;
+}
+
+function inputValueForStep(stepId: string, s: QualificationState): string {
+  const step = getStep(stepId);
+  if (!step?.inputKey) return "";
+  const v = s[step.inputKey];
+  if (v === undefined || v === null) return "";
+  return String(v);
+}
+
 export function CallWizard() {
   const router = useRouter();
   const [stepId, setStepId] = useState(START_STEP);
-  const [state, setState] = useState<QualificationState>({ hasOgzInterest: true });
+  const [state, setState] = useState<QualificationState>(() => initialState());
   const [inputValue, setInputValue] = useState("");
+  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+    const s = initialState();
+    return [{ stepId: START_STEP, state: s, inputValue: "" }];
+  });
   const [nonTarget, setNonTarget] = useState<keyof typeof NON_TARGET_TEXTS | null>(null);
   const [finished, setFinished] = useState(false);
 
@@ -43,10 +72,8 @@ export function CallWizard() {
   }, [stepId]);
 
   const checkSession = useCallback(async () => {
-    const res = await fetch("/api/session/check");
-    if (res.status === 401) {
-      router.push("/login?reason=session");
-    }
+    const res = await fetch("/api/session/check", { credentials: "same-origin" });
+    if (res.status === 401) router.push("/login?reason=session");
   }, [router]);
 
   useEffect(() => {
@@ -55,13 +82,70 @@ export function CallWizard() {
     return () => clearInterval(t);
   }, [checkSession]);
 
+  const resolveTarget = useCallback((start: string, s: QualificationState): string => {
+    let target = start;
+    let hops = 0;
+    while (hops < 20) {
+      const nextStep = getStep(target);
+      if (!nextStep) break;
+      if (nextStep.showIf && !nextStep.showIf(s)) {
+        target = nextStep.next ?? "result";
+        hops++;
+        continue;
+      }
+      break;
+    }
+    return target;
+  }, []);
+
+  const goToStep = useCallback(
+    (target: string, newState: QualificationState, pushHistory: boolean) => {
+      if (target === "result") {
+        setFinished(true);
+        setNonTarget(null);
+        return;
+      }
+      const resolved = resolveTarget(target, newState);
+      if (resolved === "result") {
+        setFinished(true);
+        setNonTarget(null);
+        return;
+      }
+      const nextInput = inputValueForStep(resolved, newState);
+      if (pushHistory) {
+        setHistory((h) => [
+          ...h,
+          { stepId: resolved, state: newState, inputValue: nextInput },
+        ]);
+      }
+      setStepId(resolved);
+      setState(newState);
+      setInputValue(nextInput);
+      setFinished(false);
+      setNonTarget(null);
+    },
+    [resolveTarget]
+  );
+
   useEffect(() => {
     const s = getStep(stepId);
     if (s?.showIf && !s.showIf(state)) {
-      const nextId = s.next ?? "result";
-      if (nextId !== stepId) setStepId(nextId);
+      const target = resolveTarget(s.next ?? "result", state);
+      if (target !== stepId) goToStep(target, state, false);
     }
-  }, [stepId, state]);
+  }, [stepId, state, resolveTarget, goToStep]);
+
+  const goBack = useCallback(() => {
+    if (history.length <= 1) return;
+    const nextHistory = history.slice(0, -1);
+    const prev = nextHistory[nextHistory.length - 1];
+    setHistory(nextHistory);
+    setStepId(prev.stepId);
+    setState(prev.state);
+    setInputValue(prev.inputValue);
+    setFinished(false);
+    setNonTarget(null);
+  }, [history]);
 
   const goNext = useCallback(
     (answer: AnswerOption | null, inputOverride?: string) => {
@@ -75,18 +159,18 @@ export function CallWizard() {
           if (!Number.isFinite(num)) return;
           patch = { ...patch, [key]: num } as Partial<QualificationState>;
         } else {
-          patch = {
-            ...patch,
-            [key]: inputOverride ?? inputValue,
-          } as Partial<QualificationState>;
+          const val = (inputOverride ?? inputValue).trim();
+          if (!val) return;
+          patch = { ...patch, [key]: val } as Partial<QualificationState>;
         }
       }
 
       const newState = applyPatch(state, patch);
-      setState(newState);
-      setInputValue("");
 
-      const next = resolveNext(step, answer, newState);
+      if (step.id === "ctx_manager_name" && newState.managerName) {
+        localStorage.setItem(MANAGER_NAME_KEY, newState.managerName);
+      }
+
       if (answer?.endFlow) {
         setNonTarget(
           answer.endFlow === "non_target_a"
@@ -95,32 +179,17 @@ export function CallWizard() {
               ? "non_target_b"
               : "non_target_c"
         );
+        setFinished(false);
         return;
       }
-      if (next === "result") {
-        setFinished(true);
-        return;
-      }
-      let target = next;
-      let hops = 0;
-      while (hops < 20) {
-        const nextStep = getStep(target);
-        if (!nextStep) break;
-        if (nextStep.showIf && !nextStep.showIf(newState)) {
-          target = nextStep.next ?? "result";
-          hops++;
-          continue;
-        }
-        break;
-      }
-      if (target === "result") {
-        setFinished(true);
-        return;
-      }
-      setStepId(target);
+
+      const next = resolveNext(step, answer, newState);
+      goToStep(next, newState, true);
     },
-    [step, state, inputValue]
+    [step, state, inputValue, goToStep]
   );
+
+  const displayText = step ? formatManagerText(step.managerText, state) : "";
 
   const results = useMemo(() => {
     if (!finished) return null;
@@ -139,10 +208,12 @@ export function CallWizard() {
     return { funnel, priority, segment, phrase, jtbd: jtbdResolved, jtbdTitle: jtbd?.title };
   }, [finished, state]);
 
+  const canGoBack = history.length > 1 && !finished && !nonTarget;
+
   if (nonTarget) {
     const nt = NON_TARGET_TEXTS[nonTarget];
     return (
-      <ResultLayout title={nt.title}>
+      <ResultLayout title={nt.title} onBack={goBack} canGoBack={history.length > 1}>
         <p className="rounded-xl bg-amber-50 p-4 text-sm leading-relaxed text-amber-950">
           {nt.managerText}
         </p>
@@ -159,7 +230,7 @@ export function CallWizard() {
 
   if (finished && results) {
     return (
-      <ResultLayout title="Итог квалификации">
+      <ResultLayout title="Итог квалификации" onBack={goBack} canGoBack={history.length > 1}>
         <section className="space-y-4">
           <div className="rounded-xl bg-brand-500/10 p-4 ring-1 ring-brand-200">
             <h3 className="text-sm font-semibold text-brand-800">Воронка CRM</h3>
@@ -229,10 +300,6 @@ export function CallWizard() {
 
   if (!step) return <p>Шаг не найден</p>;
 
-  if (step.showIf && !step.showIf(state)) {
-    return <p className="text-sm text-slate-500">Переход…</p>;
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2 text-xs text-slate-500">
@@ -248,7 +315,7 @@ export function CallWizard() {
 
       <div className="card-panel p-6">
         <p className="text-base font-medium leading-relaxed text-slate-900 whitespace-pre-wrap">
-          {step.managerText}
+          {displayText}
         </p>
         {step.hint && (
           <p className="mt-3 text-xs leading-relaxed text-slate-500">{step.hint}</p>
@@ -258,6 +325,13 @@ export function CallWizard() {
           <div className="mt-6 space-y-2">
             <input
               type={step.input === "number" ? "number" : "text"}
+              inputMode={
+                step.input === "tel"
+                  ? "tel"
+                  : step.input === "number"
+                    ? "numeric"
+                    : undefined
+              }
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={step.inputPlaceholder}
@@ -274,7 +348,7 @@ export function CallWizard() {
               <button
                 type="button"
                 className="btn-ghost w-full text-sm"
-                onClick={() => setStepId("budget_fallback")}
+                onClick={() => goToStep("budget_fallback", state, true)}
               >
                 Клиент не назвал сумму / затрудняется
               </button>
@@ -296,6 +370,12 @@ export function CallWizard() {
             ))}
           </div>
         )}
+
+        {canGoBack && (
+          <button type="button" className="btn-ghost mt-4 w-full" onClick={goBack}>
+            ← Назад
+          </button>
+        )}
       </div>
     </div>
   );
@@ -304,20 +384,39 @@ export function CallWizard() {
 function ResultLayout({
   title,
   children,
+  onBack,
+  canGoBack,
 }: {
   title: string;
   children: React.ReactNode;
+  onBack?: () => void;
+  canGoBack?: boolean;
 }) {
   return (
     <div className="card-panel p-6">
       <h2 className="text-xl font-bold text-slate-900">{title}</h2>
       <div className="mt-4">{children}</div>
+      {canGoBack && onBack && (
+        <button type="button" className="btn-ghost mt-4 w-full" onClick={onBack}>
+          ← Назад
+        </button>
+      )}
     </div>
   );
 }
 
 function CrmSummary({ state }: { state: QualificationState }) {
+  const source =
+    state.leadSource === "transfer"
+      ? "Скорозвон"
+      : state.leadSource === "application"
+        ? "Заявка"
+        : "—";
   const rows: [string, string][] = [
+    ["Источник", source],
+    ["Телефон клиента", state.clientPhone ?? "—"],
+    ["ID сделки", state.dealId ?? "—"],
+    ["Менеджер", state.managerName ?? "—"],
     ["Тип клиента", state.clientType ?? "—"],
     ["Потенциал", state.potential?.toString() ?? "—"],
     ["Контакт", state.contactRole?.toUpperCase() ?? "—"],
@@ -354,6 +453,9 @@ function buildCrmText(
     `Воронка: ${results.funnel.funnelLabel}`,
     `Приоритет: ${results.priority.label}`,
     `Сегмент: ${results.segment}`,
+    `Телефон: ${state.clientPhone ?? "—"}`,
+    `ID сделки: ${state.dealId ?? "—"}`,
+    `Менеджер: ${state.managerName ?? "—"}`,
     `Тип: ${state.clientType ?? "—"}`,
     `Потенциал: ${state.potential ?? "—"}`,
     `ЛПР/ЛВР/ЛИР: ${state.contactRole ?? "—"}`,

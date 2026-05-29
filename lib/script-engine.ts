@@ -14,7 +14,7 @@ export type ScriptStep = {
   block: string;
   managerText: string;
   hint?: string;
-  input?: "text" | "number" | "email";
+  input?: "text" | "number" | "email" | "tel";
   inputKey?: keyof QualificationState;
   inputPlaceholder?: string;
   answers?: AnswerOption[];
@@ -22,55 +22,57 @@ export type ScriptStep = {
   showIf?: (s: QualificationState) => boolean;
 };
 
+/** Подстановка имени менеджера в текст скрипта */
+export function formatManagerText(
+  text: string,
+  state: QualificationState
+): string {
+  const name = state.managerName?.trim() || "…";
+  return text.replace(/\{\{managerName\}\}/g, name);
+}
+
 export const SCRIPT_STEPS: ScriptStep[] = [
   {
     id: "ctx_source",
     block: "Контекст",
     managerText: "Выберите источник обращения (для подстановки в открытие)",
     answers: [
-      { id: "transfer", label: "Передали из скорозвона", patch: { leadSource: "transfer" }, next: "ctx_transfer" },
-      { id: "application", label: "Оставляли заявку", patch: { leadSource: "application" }, next: "ctx_application" },
+      { id: "transfer", label: "Передали из скорозвона", patch: { leadSource: "transfer" }, next: "ctx_client_phone" },
+      { id: "application", label: "Оставляли заявку", patch: { leadSource: "application" }, next: "ctx_client_phone" },
     ],
   },
   {
-    id: "ctx_transfer",
+    id: "ctx_client_phone",
     block: "Контекст",
-    managerText: "Имя скорозвонщицы и договорённость из примечания",
-    input: "text",
-    inputKey: "transferName",
-    inputPlaceholder: "Имя",
-    next: "ctx_transfer_note",
+    managerText: "Номер телефона клиента",
+    input: "tel",
+    inputKey: "clientPhone",
+    inputPlaceholder: "+7 900 000-00-00",
+    next: "ctx_deal_id",
   },
   {
-    id: "ctx_transfer_note",
+    id: "ctx_deal_id",
     block: "Контекст",
-    managerText: "Цитата договорённости",
+    managerText: "ID сделки",
     input: "text",
-    inputKey: "transferNote",
-    next: "open_1",
+    inputKey: "dealId",
+    inputPlaceholder: "Например: 12345",
+    next: "ctx_manager_name",
   },
   {
-    id: "ctx_application",
+    id: "ctx_manager_name",
     block: "Контекст",
-    managerText: "Где оставили заявку и о чём была заявка",
+    managerText: "Ваше имя (подставится в фразу «Меня зовут …» на следующем экране)",
     input: "text",
-    inputKey: "applicationPlace",
-    inputPlaceholder: "Где оставили",
-    next: "ctx_application_topic",
-  },
-  {
-    id: "ctx_application_topic",
-    block: "Контекст",
-    managerText: "Тема заявки",
-    input: "text",
-    inputKey: "applicationTopic",
+    inputKey: "managerName",
+    inputPlaceholder: "Ваше имя",
     next: "open_1",
   },
   {
     id: "open_1",
     block: "1. Открытие",
     managerText:
-      "«(Имя), добрый день! Меня зовут Екатерина, компания «Ориентир», специалист проектно-сметного отдела. Мне передали ваш контакт / вы оставляли заявку. Подтвердите: вам требуется огнезащита металлоконструкций?»",
+      "«(Имя), добрый день! Меня зовут {{managerName}}, компания «Ориентир», специалист проектно-сметного отдела. Мне передали ваш контакт / вы оставляли заявку. Подтвердите: вам требуется огнезащита металлоконструкций?»",
     hint: "(Клиент отвечает, скорее всего, «да» - это первое согласие).",
     answers: [
       { id: "yes", label: "Да", patch: { hasOgzInterest: true }, next: "open_2" },

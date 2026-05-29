@@ -17,10 +17,9 @@ export type SelectionFactor = "expertise" | "timing" | "price" | "cheapest_only"
 export type QualificationState = {
   clientName?: string;
   leadSource?: "transfer" | "application";
-  transferName?: string;
-  transferNote?: string;
-  applicationPlace?: string;
-  applicationTopic?: string;
+  clientPhone?: string;
+  dealId?: string;
+  managerName?: string;
 
   clientType?: ClientType;
   contactRole?: ContactRole;
