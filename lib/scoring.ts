@@ -294,6 +294,94 @@ export function calculateFunnel(s: QualificationState): FunnelResult {
   };
 }
 
+export type NonTargetFlowId = "non_target_a" | "non_target_b" | "non_target_c";
+
+export type NonTargetResult = {
+  situationTitle: string;
+  situationSubtitle: string;
+  funnelLabel: string;
+  funnelReasons: string[];
+  priorityLabel: string;
+  priorityReasons: string[];
+  segment: string;
+  crmNote: string;
+};
+
+/** Итог CRM для нецелевого клиента (ситуации А / Б / В) */
+export function calculateNonTargetResult(
+  flow: NonTargetFlowId,
+  s: QualificationState
+): NonTargetResult {
+  const shared = {
+    segment: s.segment ?? "—",
+    situationTitle: "",
+    situationSubtitle: "",
+    funnelLabel: "",
+    funnelReasons: [] as string[],
+    priorityLabel: "",
+    priorityReasons: [] as string[],
+    crmNote: "",
+  };
+
+  if (flow === "non_target_a") {
+    return {
+      ...shared,
+      situationTitle: "Ситуация А",
+      situationSubtitle: "Объект «когда-нибудь потом» / в следующем году",
+      funnelLabel: FUNNEL_LABELS.longterm,
+      funnelReasons: [
+        "Сроки ОГЗ отложены",
+        "Стратегическое планирование, не активная стройка",
+        "Перезвон через 6–12 месяцев",
+      ],
+      priorityLabel: "Когда будут возможности по ресурсу",
+      priorityReasons: [
+        "Не целевой на текущий момент",
+        "Не тратить ресурс менеджера сейчас",
+      ],
+      crmNote: "Пометка: вернуться к контакту при появлении сроков",
+    };
+  }
+
+  if (flow === "non_target_b") {
+    return {
+      ...shared,
+      situationTitle: "Ситуация Б",
+      situationSubtitle: "Не занимается огнезащитой / не тот отдел",
+      funnelLabel: FUNNEL_LABELS.reserve,
+      funnelReasons: [
+        "Нет запроса по ОГЗ",
+        "Ошибочный контакт / не та тема",
+      ],
+      priorityLabel: "Точно не делаем",
+      priorityReasons: [
+        "Не наша специализация",
+        "Завершить диалог без КП",
+      ],
+      crmNote: "Закрыть как нецелевой; при необходимости — передать контакт коллегам",
+    };
+  }
+
+  return {
+    ...shared,
+    situationTitle: "Ситуация В",
+    situationSubtitle: "Мелкие / разовые объекты — не наш профиль",
+    funnelLabel: FUNNEL_LABELS.not_sql,
+    funnelReasons: [
+      "Мелкий или разовый объём",
+      "Экономически нецелевой чек",
+      ...(s.budgetClass ? [`Чек: ${s.budgetClass}`] : []),
+      ...(s.potential ? [`Потенциал: ${s.potential}`] : []),
+    ],
+    priorityLabel: "Точно не делаем",
+    priorityReasons: [
+      "Не сможем дать лучшее предложение на рынке",
+      "Рекомендовать профильного подрядчика",
+    ],
+    crmNote: "Закрыть как не SQL / нецелевой по объёму",
+  };
+}
+
 export function calculatePriority(s: QualificationState): PriorityResult {
   const urgent: string[] = [];
   const against: string[] = [];

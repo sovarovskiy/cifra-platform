@@ -17,6 +17,7 @@ import {
 import type { QualificationState } from "@/lib/scoring";
 import {
   calculateFunnel,
+  calculateNonTargetResult,
   calculatePriority,
   SEGMENT_PHRASES,
 } from "@/lib/scoring";
@@ -232,27 +233,88 @@ export function CallWizard() {
   const canGoBack = history.length > 1 && !finished && !nonTarget;
 
   if (nonTarget) {
-    const nt = NON_TARGET_TEXTS[nonTarget];
-    const phrase = formatManagerText(nt.managerText, state);
+    const ntResult = calculateNonTargetResult(nonTarget, state);
+    const phrase = formatManagerText(
+      NON_TARGET_TEXTS[nonTarget].managerText,
+      state
+    );
     return (
       <ResultLayout
-        title={NON_TARGET_MODULE.title}
+        title="Итог квалификации"
         onBack={goBack}
         canGoBack={history.length > 1}
       >
-        <p className="text-sm text-slate-600">{NON_TARGET_MODULE.description}</p>
-        <h3 className="mt-4 text-sm font-bold text-amber-900">{nt.title}</h3>
-        <p className="mt-1 text-xs text-amber-800">{nt.subtitle}</p>
-        <p className="glass-speech mt-3 rounded-xl p-4 text-sm leading-relaxed text-amber-950 whitespace-pre-wrap">
-          {phrase}
+        <p className="text-sm font-medium text-brand-700">
+          {NON_TARGET_MODULE.title}
         </p>
-        <button
-          type="button"
-          className="btn-primary mt-6"
-          onClick={() => window.location.reload()}
-        >
-          Новый звонок
-        </button>
+        <p className="mt-1 text-xs text-slate-600">{NON_TARGET_MODULE.description}</p>
+
+        <div className="glass-speech glass-speech-warn mt-4 rounded-xl p-4">
+          <h3 className="text-sm font-bold text-slate-900">
+            {ntResult.situationTitle}
+          </h3>
+          <p className="mt-0.5 text-xs text-slate-600">{ntResult.situationSubtitle}</p>
+          <p className="mt-3 text-sm leading-relaxed text-slate-800 whitespace-pre-wrap">
+            {phrase}
+          </p>
+          <p className="mt-2 text-xs font-semibold text-brand-600">
+            Проговорите клиенту ↑
+          </p>
+        </div>
+
+        <section className="mt-6 space-y-4">
+          <div className="glass-inset rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-brand-700">Воронка CRM</h3>
+            <p className="mt-1 text-xl font-bold text-slate-900">
+              {ntResult.funnelLabel}
+            </p>
+            <ul className="mt-2 list-inside list-disc text-sm text-slate-700">
+              {ntResult.funnelReasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="glass-inset rounded-xl border-red-200/50 p-4">
+            <h3 className="text-sm font-semibold text-slate-800">Приоритет работы</h3>
+            <p className="mt-1 text-lg font-bold text-red-800">
+              {ntResult.priorityLabel}
+            </p>
+            <ul className="mt-2 list-inside list-disc text-sm text-slate-700">
+              {ntResult.priorityReasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-slate-600">
+              <span className="font-medium">Действие в CRM:</span> {ntResult.crmNote}
+            </p>
+          </div>
+
+          <div className="glass-inset rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-slate-800">Сегмент</h3>
+            <p className="mt-1 text-sm text-slate-700">{ntResult.segment}</p>
+          </div>
+
+          <CrmSummary state={state} />
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={() =>
+                navigator.clipboard.writeText(buildNonTargetCrmText(state, ntResult, phrase))
+              }
+            >
+              Копировать для CRM
+            </button>
+            <button
+              type="button"
+              className="btn-ghost"
+              onClick={() => window.location.reload()}
+            >
+              Новый звонок
+            </button>
+          </div>
+        </section>
       </ResultLayout>
     );
   }
@@ -292,7 +354,7 @@ export function CallWizard() {
             </ul>
           </div>
 
-          <div className="card-panel p-4">
+          <div className="glass-inset rounded-xl p-4">
             <h3 className="text-sm font-semibold">Сегмент JTBD: {results.segment}</h3>
             {results.jtbdTitle && (
               <p className="text-sm text-slate-600">{results.jtbdTitle}</p>
@@ -436,7 +498,7 @@ function ResultLayout({
       <h2 className="text-xl font-bold text-brand-800">{title}</h2>
       <div className="mt-4">{children}</div>
       {canGoBack && onBack && (
-        <button type="button" className="btn-ghost mt-4 w-full" onClick={onBack}>
+        <button type="button" className="btn-ghost-wizard mt-4 w-full" onClick={onBack}>
           ← Назад
         </button>
       )}
@@ -466,7 +528,7 @@ function CrmSummary({ state }: { state: QualificationState }) {
     ["Сегмент", state.segment ?? "—"],
   ];
   return (
-    <div className="card-panel p-4">
+    <div className="glass-inset rounded-xl p-4">
       <h3 className="text-sm font-semibold">Параметры для CRM</h3>
       <dl className="mt-2 grid gap-1 text-sm">
         {rows.map(([k, v]) => (
@@ -478,6 +540,31 @@ function CrmSummary({ state }: { state: QualificationState }) {
       </dl>
     </div>
   );
+}
+
+function buildNonTargetCrmText(
+  state: QualificationState,
+  nt: ReturnType<typeof calculateNonTargetResult>,
+  phrase: string
+) {
+  return [
+    `Нецелевой клиент: ${nt.situationTitle}`,
+    `Воронка: ${nt.funnelLabel}`,
+    `Приоритет: ${nt.priorityLabel}`,
+    `CRM: ${nt.crmNote}`,
+    `Сегмент: ${nt.segment}`,
+    "",
+    "Фраза завершения:",
+    phrase.replace(/^«|»$/g, ""),
+    "",
+    `Телефон: ${state.clientPhone ?? "—"}`,
+    `ID сделки: ${state.dealId ?? "—"}`,
+    `Менеджер: ${state.managerName ?? "—"}`,
+    `Тип: ${state.clientType ?? "—"}`,
+    `Потенциал: ${state.potential ?? "—"}`,
+    `Регион: ${state.region ?? "—"}`,
+    `Чек: ${state.budgetClass ?? "—"}`,
+  ].join("\n");
 }
 
 function buildCrmText(
