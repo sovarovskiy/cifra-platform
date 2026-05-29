@@ -298,7 +298,7 @@ export function CallWizard() {
           <div className="flex flex-col gap-3">
             <button
               type="button"
-              className="btn-primary"
+              className="btn-wizard"
               onClick={() =>
                 navigator.clipboard.writeText(buildNonTargetCrmText(state, ntResult, phrase))
               }
@@ -307,7 +307,7 @@ export function CallWizard() {
             </button>
             <button
               type="button"
-              className="btn-secondary"
+              className="btn-wizard"
               onClick={() => window.location.reload()}
             >
               Новый звонок
@@ -371,14 +371,14 @@ export function CallWizard() {
           <CrmSummary state={state} />
           <button
             type="button"
-            className="btn-primary"
+            className="btn-wizard"
             onClick={() => navigator.clipboard.writeText(buildCrmText(state, results))}
           >
             Копировать для CRM
           </button>
           <button
             type="button"
-            className="btn-secondary"
+            className="btn-wizard"
             onClick={() => window.location.reload()}
           >
             Новый звонок
@@ -428,7 +428,7 @@ export function CallWizard() {
             {step.optional && (
               <button
                 type="button"
-                className="btn-wizard btn-wizard--muted"
+                className="btn-wizard"
                 onClick={() => goNext(null, "")}
               >
                 Пропустить
@@ -443,7 +443,7 @@ export function CallWizard() {
               <button
                 key={a.id}
                 type="button"
-                className={answerButtonClass(a, step.answers)}
+                className={answerButtonClass(a)}
                 onClick={() => goNext(a)}
               >
                 {a.label}
@@ -452,7 +452,7 @@ export function CallWizard() {
             {step.id === "budget_main" && (
               <button
                 type="button"
-                className="btn-wizard btn-wizard--muted"
+                className="btn-wizard"
                 onClick={() => goToStep("budget_fallback", state, true)}
               >
                 Клиент не назвал сумму / затрудняется

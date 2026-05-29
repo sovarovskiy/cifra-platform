@@ -342,8 +342,8 @@ body {
   }
 }
 
-/* Кнопки мастера — вне @layer, чтобы не сбрасывались браузером / Tailwind */
-.wizard-card button.btn-wizard {
+/* Зелёные кнопки мастера — вне @layer, чтобы не сбрасывались браузером / Tailwind */
+button.btn-wizard {
   box-sizing: border-box;
   display: flex;
   width: 100%;
@@ -368,37 +368,14 @@ body {
   transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.wizard-card button.btn-wizard:hover:not(:disabled) {
+button.btn-wizard:hover:not(:disabled) {
   background: linear-gradient(180deg, #32919b 0%, #1f636d 100%);
   box-shadow: var(--shadow-btn-primary-hover);
   transform: translateY(-1px);
 }
 
-.wizard-card button.btn-wizard:active:not(:disabled) {
+button.btn-wizard:active:not(:disabled) {
   transform: translateY(0);
-}
-
-.wizard-card button.btn-wizard--soft {
-  color: var(--color-text);
-  background: var(--color-card-btn-yes);
-  border: 1px solid #d1d9de;
-  box-shadow: var(--shadow-card-btn-yes);
-}
-
-.wizard-card button.btn-wizard--soft:hover:not(:disabled) {
-  background: #e8eaed;
-  box-shadow: 0 10px 26px rgba(26, 32, 44, 0.14);
-}
-
-.wizard-card button.btn-wizard--muted {
-  color: #fff;
-  background: var(--color-card-btn-no);
-  border: 1px solid #7a8689;
-  box-shadow: var(--shadow-card-btn-no);
-}
-
-.wizard-card button.btn-wizard--muted:hover:not(:disabled) {
-  background: #7d8b8e;
 }
 
 button.btn-wizard-back {
