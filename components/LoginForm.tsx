@@ -35,7 +35,7 @@ export function LoginForm() {
       setError(data.error ?? `Ошибка ${res.status}`);
       return;
     }
-    setInfo(data.message ?? "Код смотрите в окне терминала (npm run dev).");
+    setInfo(data.message ?? "Код показан на экране ниже.");
     setDevCode(data.devCode ?? "");
     setStep("code");
   }

@@ -18,13 +18,10 @@ export async function POST(req: Request) {
       );
     }
     const code = issueLoginCode(normalized);
-    const isDev = process.env.NODE_ENV !== "production";
     return NextResponse.json({
       ok: true,
-      message: isDev
-        ? "Код показан ниже (режим разработки)."
-        : "Код отправлен на почту.",
-      ...(isDev ? { devCode: code } : {}),
+      message: "Код показан на экране ниже.",
+      devCode: code,
     });
   } catch (e) {
     console.error("[Цифра] request-code:", e);
