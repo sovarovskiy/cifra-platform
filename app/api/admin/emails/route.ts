@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCurrentUser, normalizeEmail } from "@/lib/auth";
 import {
   deleteAllowedEmail,
+  getPersistenceMode,
+  getPersistenceWarning,
   isRootAdmin,
   listAllowedEmails,
   upsertAllowedEmail,
@@ -12,12 +14,16 @@ export async function GET() {
   if (!user?.isAdmin) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
-  const emails = listAllowedEmails().map((e) => ({
+  const emails = (await listAllowedEmails()).map((e) => ({
     email: e.email,
     is_admin: e.is_admin ? 1 : 0,
     created_at: e.created_at,
   }));
-  return NextResponse.json({ emails });
+  return NextResponse.json({
+    emails,
+    persistence: getPersistenceMode(),
+    persistenceWarning: getPersistenceWarning(),
+  });
 }
 
 export async function POST(req: Request) {
@@ -39,7 +45,7 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  upsertAllowedEmail(email, !!isAdmin);
+  await upsertAllowedEmail(email, !!isAdmin);
   return NextResponse.json({ ok: true });
 }
 
@@ -59,6 +65,6 @@ export async function DELETE(req: Request) {
       { status: 400 }
     );
   }
-  deleteAllowedEmail(email);
+  await deleteAllowedEmail(email);
   return NextResponse.json({ ok: true });
 }

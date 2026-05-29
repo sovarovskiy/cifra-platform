@@ -1,6 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
+import { getRedis, hasRedisStore } from "./kv";
 
 export type AllowedEmail = {
   email: string;
@@ -21,6 +22,8 @@ type StoreData = {
   sessions: SessionRow[];
 };
 
+const REDIS_KEY = "cifra:store:v1";
+
 let storePathCache: string | null = null;
 
 function defaultStore(): StoreData {
@@ -31,14 +34,41 @@ function norm(email: string): string {
   return email.trim().toLowerCase();
 }
 
-/** На Vercel диск только для чтения — пишем в /tmp */
+function isServerlessEnv(): boolean {
+  return (
+    process.env.VERCEL === "1" ||
+    !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    !!process.env.VERCEL_ENV
+  );
+}
+
+export type PersistenceMode = "redis" | "file" | "ephemeral";
+
+export function getPersistenceMode(): PersistenceMode {
+  if (hasRedisStore()) return "redis";
+  if (isServerlessEnv()) return "ephemeral";
+  return "file";
+}
+
+export function getPersistenceWarning(): string | null {
+  if (getPersistenceMode() !== "ephemeral") return null;
+  return (
+    "Список почт на сервере хранится во временной памяти и через некоторое время " +
+    "сбрасывается. Подключите Redis (Vercel → Storage → Upstash Redis → Connect) " +
+    "или добавьте почты в переменную ALLOWED_EMAILS на Vercel."
+  );
+}
+
+/** На Vercel без Redis — только /tmp (не сохраняется между запусками) */
 function resolveStorePath(): string {
   if (storePathCache) return storePathCache;
 
-  const isServerless =
-    process.env.VERCEL === "1" ||
-    !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
-    !!process.env.VERCEL_ENV;
+  const isServerless = isServerlessEnv();
+
+  if (isServerless && !hasRedisStore()) {
+    storePathCache = path.join(os.tmpdir(), "cifra-store.json");
+    return storePathCache;
+  }
 
   if (isServerless) {
     storePathCache = path.join(os.tmpdir(), "cifra-store.json");
@@ -63,10 +93,13 @@ function resolveStorePath(): string {
 }
 
 export function getResolvedStorePathForDebug(): string {
-  return resolveStorePath();
+  return hasRedisStore() ? `redis:${REDIS_KEY}` : resolveStorePath();
 }
 
 export function canWriteStoreForDebug(): { ok: boolean; path: string; error?: string } {
+  if (hasRedisStore()) {
+    return { ok: true, path: `redis:${REDIS_KEY}` };
+  }
   const p = resolveStorePath();
   try {
     const dir = path.dirname(p);
@@ -81,27 +114,31 @@ export function canWriteStoreForDebug(): { ok: boolean; path: string; error?: st
   }
 }
 
-function readStore(): StoreData {
+function parseStore(raw: string): StoreData {
+  const data = JSON.parse(raw) as StoreData;
+  if (!Array.isArray(data.allowed_emails)) data.allowed_emails = [];
+  if (!Array.isArray(data.sessions)) data.sessions = [];
+  return data;
+}
+
+function readStoreFile(): StoreData {
   const storePath = resolveStorePath();
   try {
     const dir = path.dirname(storePath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     if (!fs.existsSync(storePath)) {
-      writeStore(defaultStore());
+      writeStoreFile(defaultStore());
       return defaultStore();
     }
     const raw = fs.readFileSync(storePath, "utf-8");
-    const data = JSON.parse(raw) as StoreData;
-    if (!Array.isArray(data.allowed_emails)) data.allowed_emails = [];
-    if (!Array.isArray(data.sessions)) data.sessions = [];
-    return data;
+    return parseStore(raw);
   } catch (e) {
-    console.error("[Цифра] readStore:", e);
+    console.error("[Цифра] readStoreFile:", e);
     return defaultStore();
   }
 }
 
-function writeStore(data: StoreData): void {
+function writeStoreFile(data: StoreData): void {
   let storePath = resolveStorePath();
   const payload = JSON.stringify(data, null, 2);
 
@@ -123,6 +160,35 @@ function writeStore(data: StoreData): void {
   }
 }
 
+async function readStore(): Promise<StoreData> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      const raw = await redis.get<string>(REDIS_KEY);
+      if (!raw) {
+        const empty = defaultStore();
+        await writeStore(empty);
+        return empty;
+      }
+      if (typeof raw === "string") return parseStore(raw);
+      return parseStore(JSON.stringify(raw));
+    } catch (e) {
+      console.error("[Цифра] readStore redis:", e);
+      return defaultStore();
+    }
+  }
+  return readStoreFile();
+}
+
+async function writeStore(data: StoreData): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(REDIS_KEY, JSON.stringify(data));
+    return;
+  }
+  writeStoreFile(data);
+}
+
 function parseEmailsFromEnv(value: string | undefined): string[] {
   if (!value?.trim()) return [];
   return value
@@ -142,8 +208,8 @@ export function isRootAdmin(email: string): boolean {
   return !!root && norm(email) === root;
 }
 
-/** Синхронизация почт из ADMIN_EMAIL и ALLOWED_EMAILS (для Vercel) */
-export function ensureAdminSeed(): void {
+/** Синхронизация почт из ADMIN_EMAIL и ALLOWED_EMAILS */
+export async function ensureAdminSeed(): Promise<void> {
   const fromEnv = new Set<string>();
   const root = getRootAdminEmail();
   if (root) fromEnv.add(root);
@@ -153,7 +219,7 @@ export function ensureAdminSeed(): void {
 
   if (fromEnv.size === 0) return;
 
-  const data = readStore();
+  const data = await readStore();
   let changed = false;
 
   for (const email of fromEnv) {
@@ -174,18 +240,19 @@ export function ensureAdminSeed(): void {
     }
   }
 
-  if (changed) writeStore(data);
+  if (changed) await writeStore(data);
 }
 
-export function listAllowedEmails(): AllowedEmail[] {
-  ensureAdminSeed();
-  return readStore().allowed_emails.sort(
+export async function listAllowedEmails(): Promise<AllowedEmail[]> {
+  await ensureAdminSeed();
+  const list = (await readStore()).allowed_emails;
+  return list.sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 }
 
-export function upsertAllowedEmail(email: string, isAdmin: boolean): void {
-  const data = readStore();
+export async function upsertAllowedEmail(email: string, isAdmin: boolean): Promise<void> {
+  const data = await readStore();
   const n = norm(email);
   const idx = data.allowed_emails.findIndex((e) => norm(e.email) === n);
   if (idx >= 0) {
@@ -197,45 +264,45 @@ export function upsertAllowedEmail(email: string, isAdmin: boolean): void {
       created_at: new Date().toISOString(),
     });
   }
-  writeStore(data);
+  await writeStore(data);
 }
 
-export function deleteAllowedEmail(email: string): void {
-  const data = readStore();
+export async function deleteAllowedEmail(email: string): Promise<void> {
+  const data = await readStore();
   const n = norm(email);
   data.allowed_emails = data.allowed_emails.filter((e) => norm(e.email) !== n);
   data.sessions = data.sessions.filter((s) => norm(s.email) !== n);
-  writeStore(data);
+  await writeStore(data);
 }
 
-export function isEmailAllowed(email: string): boolean {
-  ensureAdminSeed();
+export async function isEmailAllowed(email: string): Promise<boolean> {
+  await ensureAdminSeed();
   const n = norm(email);
-  return readStore().allowed_emails.some((e) => norm(e.email) === n);
+  return (await readStore()).allowed_emails.some((e) => norm(e.email) === n);
 }
 
-export function isAdminEmail(email: string): boolean {
-  ensureAdminSeed();
+export async function isAdminEmail(email: string): Promise<boolean> {
+  await ensureAdminSeed();
   const n = norm(email);
-  return readStore().allowed_emails.some(
+  return (await readStore()).allowed_emails.some(
     (e) => norm(e.email) === n && e.is_admin
   );
 }
 
-export function deleteSessionsForEmail(email: string): void {
-  const data = readStore();
+export async function deleteSessionsForEmail(email: string): Promise<void> {
+  const data = await readStore();
   const n = norm(email);
   data.sessions = data.sessions.filter((s) => norm(s.email) !== n);
-  writeStore(data);
+  await writeStore(data);
 }
 
-export function createSessionRow(
+export async function createSessionRow(
   token: string,
   email: string,
   deviceId: string,
   expiresAt: string
-): void {
-  const data = readStore();
+): Promise<void> {
+  const data = await readStore();
   const n = norm(email);
   data.sessions = data.sessions.filter((s) => norm(s.email) === n);
   data.sessions.push({
@@ -245,16 +312,16 @@ export function createSessionRow(
     created_at: new Date().toISOString(),
     expires_at: expiresAt,
   });
-  writeStore(data);
+  await writeStore(data);
 }
 
-export function getSessionByToken(token: string): SessionRow | null {
-  const row = readStore().sessions.find((s) => s.token === token);
+export async function getSessionByToken(token: string): Promise<SessionRow | null> {
+  const row = (await readStore()).sessions.find((s) => s.token === token);
   return row ?? null;
 }
 
-export function deleteSessionByToken(token: string): void {
-  const data = readStore();
+export async function deleteSessionByToken(token: string): Promise<void> {
+  const data = await readStore();
   data.sessions = data.sessions.filter((s) => s.token !== token);
-  writeStore(data);
+  await writeStore(data);
 }

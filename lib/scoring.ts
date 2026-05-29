@@ -40,6 +40,8 @@ export type QualificationState = {
   mchsPrescription?: boolean;
   competitors?: boolean;
   competitorOffers?: boolean;
+  /** Явно зафиксировано: мелкий/разовый объект — нецелевой (ситуация В) */
+  markedNonTargetSmall?: boolean;
 };
 
 export function budgetClassFromRub(rub: number): BudgetClass {

@@ -20,10 +20,25 @@
         • Environment Variables:
             ADMIN_EMAIL = sovarovsky@gmail.com
             SESSION_SECRET = любая-длинная-строка-32-символа
+        • После Deploy: Storage → Create Database →
+            Upstash Redis → Connect to Project → Redeploy
+          (иначе список почт в админке со временем пропадёт)
         • Deploy
-        • Скопируйте ссылку https://....vercel.app
+        • Скопируйте Production-ссылку (НЕ localhost!):
+            https://ВАШ-ПРОЕКТ.vercel.app/login
+          Где взять: Vercel → проект → Deployments →
+          Production → Visit → в адресной строке добавьте /login
 
-ШАГ 4. На телефоне откройте эту ссылку → «Установить приложение»
+        Проверка: в режиме «инкогнито» должна открыться
+        страница входа, не 404. Проверка API:
+            https://ВАШ-ПРОЕКТ.vercel.app/api/health
+          (должно быть {"ok":true})
+
+ШАГ 4. На телефоне откройте ссылку /login → «Установить приложение»
+
+Менеджерам отправляйте ТОЛЬКО ссылку вида:
+  https://ВАШ-ПРОЕКТ.vercel.app/login
+НЕ отправляйте http://localhost:3002 — она работает только у вас.
 
 ═══════════════════════════════════════════════════════════════
   Если шаг 2 не получается — см. «ЗАПАСНОЙ ВАРИАНТ» в конце файла

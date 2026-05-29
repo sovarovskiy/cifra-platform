@@ -45,9 +45,11 @@ export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-export { isEmailAllowed };
+export async function checkEmailAllowed(email: string): Promise<boolean> {
+  return isEmailAllowed(email);
+}
 
-export function isAdmin(email: string): boolean {
+export async function checkIsAdmin(email: string): Promise<boolean> {
   return isAdminEmail(email);
 }
 
@@ -70,10 +72,10 @@ export type SessionUser = {
   deviceId: string;
 };
 
-export function getSessionFromToken(
+export async function getSessionFromToken(
   token: string,
   deviceId: string
-): SessionUser | null {
+): Promise<SessionUser | null> {
   try {
     const parsed = JSON.parse(
       Buffer.from(token, "base64url").toString("utf-8")
@@ -88,7 +90,7 @@ export function getSessionFromToken(
 
     return {
       email: parsed.e,
-      isAdmin: isAdmin(parsed.e),
+      isAdmin: await isAdminEmail(parsed.e),
       deviceId: parsed.d,
     };
   } catch {
@@ -101,7 +103,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   const token = cookieStore.get(COOKIE_NAME)?.value;
   const deviceId = cookieStore.get("cifra_device")?.value;
   if (!token || !deviceId) return null;
-  return getSessionFromToken(token, deviceId);
+  return await getSessionFromToken(token, deviceId);
 }
 
 export function setSessionCookies(

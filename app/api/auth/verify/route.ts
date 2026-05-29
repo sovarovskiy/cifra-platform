@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
+  checkEmailAllowed,
   createSession,
-  isEmailAllowed,
   normalizeEmail,
   OTP_COOKIE_NAME,
   setSessionCookies,
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     const normalized = normalizeEmail(email);
-    if (!isEmailAllowed(normalized)) {
+    if (!(await checkEmailAllowed(normalized))) {
       return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
     }
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { issueLoginCode, isEmailAllowed, normalizeEmail, OTP_COOKIE_NAME } from "@/lib/auth";
+import { checkEmailAllowed, issueLoginCode, normalizeEmail, OTP_COOKIE_NAME } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Укажите email" }, { status: 400 });
     }
     const normalized = normalizeEmail(email);
-    if (!isEmailAllowed(normalized)) {
+    if (!(await checkEmailAllowed(normalized))) {
       return NextResponse.json(
         {
           error:

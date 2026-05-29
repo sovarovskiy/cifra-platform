@@ -6,10 +6,13 @@ import {
   applyPatch,
   formatManagerText,
   getStep,
+  NON_TARGET_MODULE,
   NON_TARGET_TEXTS,
+  detectNonTargetFlow,
   resolveNext,
   SCRIPT_STEPS,
   type AnswerOption,
+  type NonTargetFlow,
 } from "@/lib/script-engine";
 import type { QualificationState } from "@/lib/scoring";
 import {
@@ -61,7 +64,7 @@ export function CallWizard() {
     const s = initialState();
     return [{ stepId: START_STEP, state: s, inputValue: "" }];
   });
-  const [nonTarget, setNonTarget] = useState<keyof typeof NON_TARGET_TEXTS | null>(null);
+  const [nonTarget, setNonTarget] = useState<NonTargetFlow | null>(null);
   const [finished, setFinished] = useState(false);
 
   const step = getStep(stepId);
@@ -147,6 +150,15 @@ export function CallWizard() {
     setNonTarget(null);
   }, [history]);
 
+  const finishNonTarget = useCallback(
+    (flow: NonTargetFlow, newState: QualificationState) => {
+      setState(newState);
+      setNonTarget(flow);
+      setFinished(false);
+    },
+    []
+  );
+
   const goNext = useCallback(
     (answer: AnswerOption | null, inputOverride?: string) => {
       if (!step) return;
@@ -160,7 +172,15 @@ export function CallWizard() {
           patch = { ...patch, [key]: num } as Partial<QualificationState>;
         } else {
           const val = (inputOverride ?? inputValue).trim();
-          if (!val) return;
+          if (!val) {
+            if (step.optional) {
+              const newState = applyPatch(state, patch);
+              const next = resolveNext(step, answer, newState);
+              goToStep(next, newState, true);
+              return;
+            }
+            return;
+          }
           patch = { ...patch, [key]: val } as Partial<QualificationState>;
         }
       }
@@ -171,22 +191,23 @@ export function CallWizard() {
         localStorage.setItem(MANAGER_NAME_KEY, newState.managerName);
       }
 
-      if (answer?.endFlow) {
-        setNonTarget(
-          answer.endFlow === "non_target_a"
-            ? "non_target_a"
-            : answer.endFlow === "non_target_b"
-              ? "non_target_b"
-              : "non_target_c"
-        );
-        setFinished(false);
+      const nonTargetFlow = answer?.endFlow ?? detectNonTargetFlow(newState);
+      if (nonTargetFlow) {
+        finishNonTarget(nonTargetFlow, newState);
         return;
       }
 
       const next = resolveNext(step, answer, newState);
+      if (next === "non_target") {
+        const flow = detectNonTargetFlow(newState);
+        if (flow) {
+          finishNonTarget(flow, newState);
+          return;
+        }
+      }
       goToStep(next, newState, true);
     },
-    [step, state, inputValue, goToStep]
+    [step, state, inputValue, goToStep, finishNonTarget]
   );
 
   const displayText = step ? formatManagerText(step.managerText, state) : "";
@@ -212,10 +233,18 @@ export function CallWizard() {
 
   if (nonTarget) {
     const nt = NON_TARGET_TEXTS[nonTarget];
+    const phrase = formatManagerText(nt.managerText, state);
     return (
-      <ResultLayout title={nt.title} onBack={goBack} canGoBack={history.length > 1}>
-        <p className="rounded-xl bg-amber-50 p-4 text-sm leading-relaxed text-amber-950">
-          {nt.managerText}
+      <ResultLayout
+        title={NON_TARGET_MODULE.title}
+        onBack={goBack}
+        canGoBack={history.length > 1}
+      >
+        <p className="text-sm text-slate-600">{NON_TARGET_MODULE.description}</p>
+        <h3 className="mt-4 text-sm font-bold text-amber-900">{nt.title}</h3>
+        <p className="mt-1 text-xs text-amber-800">{nt.subtitle}</p>
+        <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-relaxed text-amber-950 whitespace-pre-wrap">
+          {phrase}
         </p>
         <button
           type="button"
@@ -344,13 +373,13 @@ export function CallWizard() {
             >
               Далее
             </button>
-            {step.id === "budget_main" && (
+            {step.optional && (
               <button
                 type="button"
                 className="btn-ghost w-full text-sm"
-                onClick={() => goToStep("budget_fallback", state, true)}
+                onClick={() => goNext(null, "")}
               >
-                Клиент не назвал сумму / затрудняется
+                Пропустить
               </button>
             )}
           </div>
@@ -368,6 +397,15 @@ export function CallWizard() {
                 {a.label}
               </button>
             ))}
+            {step.id === "budget_main" && (
+              <button
+                type="button"
+                className="btn-ghost w-full text-sm"
+                onClick={() => goToStep("budget_fallback", state, true)}
+              >
+                Клиент не назвал сумму / затрудняется
+              </button>
+            )}
           </div>
         )}
 

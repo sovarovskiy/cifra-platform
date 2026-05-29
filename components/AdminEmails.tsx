@@ -10,12 +10,14 @@ export function AdminEmails() {
   const [newAdmin, setNewAdmin] = useState(false);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState<string | null>(null);
+  const [persistWarning, setPersistWarning] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/admin/emails");
     if (!res.ok) return;
     const data = await res.json();
     setEmails(data.emails);
+    setPersistWarning(data.persistenceWarning ?? null);
   }, []);
 
   useEffect(() => {
@@ -78,11 +80,14 @@ export function AdminEmails() {
       <div className="card-panel p-6">
         <h2 className="text-lg font-bold">Разрешённые почты</h2>
         <p className="mt-1 text-sm text-slate-600">
-          Список хранится в базе приложения и обновляется сразу: можно добавлять
-          менеджеров, менять роль (админ / пользователь) и удалять доступ.
-          Главный администратор из <code className="text-xs">.env</code> удалить
-          нельзя.
+          Добавляйте менеджеров, меняйте роль (админ / пользователь) и удаляйте
+          доступ. Главного администратора из настроек сервера удалить нельзя.
         </p>
+        {persistWarning && (
+          <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {persistWarning}
+          </p>
+        )}
 
         <form onSubmit={add} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
           <label className="flex-1">

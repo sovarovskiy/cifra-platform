@@ -17,6 +17,8 @@ export type ScriptStep = {
   input?: "text" | "number" | "email" | "tel";
   inputKey?: keyof QualificationState;
   inputPlaceholder?: string;
+  /** Можно нажать «Пропустить» и идти дальше без значения */
+  optional?: boolean;
   answers?: AnswerOption[];
   next?: string;
   showIf?: (s: QualificationState) => boolean;
@@ -28,7 +30,10 @@ export function formatManagerText(
   state: QualificationState
 ): string {
   const name = state.managerName?.trim() || "…";
-  return text.replace(/\{\{managerName\}\}/g, name);
+  const client = state.clientName?.trim() || "…";
+  return text
+    .replace(/\{\{managerName\}\}/g, name)
+    .replace(/\(Имя\)/g, client);
 }
 
 export const SCRIPT_STEPS: ScriptStep[] = [
@@ -44,19 +49,23 @@ export const SCRIPT_STEPS: ScriptStep[] = [
   {
     id: "ctx_client_phone",
     block: "Контекст",
-    managerText: "Номер телефона клиента",
+    managerText: "Номер телефона клиента (необязательно)",
+    hint: "Можно пропустить, если номера пока нет.",
     input: "tel",
     inputKey: "clientPhone",
     inputPlaceholder: "+7 900 000-00-00",
+    optional: true,
     next: "ctx_deal_id",
   },
   {
     id: "ctx_deal_id",
     block: "Контекст",
-    managerText: "ID сделки",
+    managerText: "ID сделки (необязательно)",
+    hint: "Можно пропустить и заполнить позже в CRM.",
     input: "text",
     inputKey: "dealId",
     inputPlaceholder: "Например: 12345",
+    optional: true,
     next: "ctx_manager_name",
   },
   {
@@ -122,6 +131,12 @@ export const SCRIPT_STEPS: ScriptStep[] = [
       { id: "prescription", label: "Предписание МЧС", patch: { mchsPrescription: true }, next: "obj_type" },
       { id: "planned", label: "Плановые работы", next: "obj_type" },
       { id: "other", label: "Другое (зафиксировать)", next: "obj_type" },
+      {
+        id: "not_ogz",
+        label: "Не про огнезащиту / ошиблись номером",
+        patch: { hasOgzInterest: false },
+        endFlow: "non_target_b",
+      },
     ],
   },
   {
@@ -164,7 +179,13 @@ export const SCRIPT_STEPS: ScriptStep[] = [
     hint: "(Фиксируем ответы; если клиент затрудняется - помогаем вариантами).",
     answers: [
       { id: "unknown", label: "Затрудняется / не знает", next: "obj_mchs" },
-      { id: "known", label: "Озвучил масштаб — перейти к бюджету", next: "budget_amount" },
+      { id: "known", label: "Озвучил масштаб — перейти к бюджету", next: "budget_main" },
+      {
+        id: "small",
+        label: "Мелкий объём / разовый заказ (не наш профиль)",
+        patch: { potential: 10, markedNonTargetSmall: true },
+        endFlow: "non_target_c",
+      },
     ],
   },
   {
@@ -225,7 +246,12 @@ export const SCRIPT_STEPS: ScriptStep[] = [
     managerText:
       "«Теперь вопрос про сроки - это важно для динамики расчёта. На какой стадии стройка? Контур здания уже стоит или только фундамент?».",
     answers: [
-      { id: "foundation", label: "Только фундамент", next: "timing_ogz_ready" },
+      {
+        id: "foundation",
+        label: "Только фундамент / сроков пока нет",
+        patch: { readiness: "cold" },
+        endFlow: "non_target_a",
+      },
       { id: "contour", label: "Контур стоит", next: "timing_contour" },
       { id: "mounting", label: "Идёт монтаж МК", patch: { readiness: "hot" }, next: "timing_ogz_start" },
       { id: "mounted", label: "МК смонтированы", patch: { readiness: "hot" }, next: "timing_ogz_start" },
@@ -288,11 +314,33 @@ export const SCRIPT_STEPS: ScriptStep[] = [
     id: "budget_main",
     block: "5. Бюджет",
     managerText: "«Еще такой вопрос. Какой бюджет заложен на огнезащиту?»",
-    hint: "(получаем ответ). Если не отвечает — уточняем иначе на следующем шаге.",
-    input: "number",
-    inputKey: "budgetRub",
-    inputPlaceholder: "Сумма в рублях",
-    next: "potential",
+    hint: "Выберите диапазон по словам клиента (чек для CRM подставится автоматически).",
+    answers: [
+      {
+        id: "s",
+        label: "0,5 – 3 млн (S)",
+        patch: { budgetRub: 2_000_000, budgetClass: "S" },
+        next: "potential",
+      },
+      {
+        id: "m",
+        label: "3 – 9 млн (M)",
+        patch: { budgetRub: 6_000_000, budgetClass: "M" },
+        next: "potential",
+      },
+      {
+        id: "l",
+        label: "10 – 29 млн (L)",
+        patch: { budgetRub: 15_000_000, budgetClass: "L" },
+        next: "potential",
+      },
+      {
+        id: "xl",
+        label: "50 млн и более (XL)",
+        patch: { budgetRub: 50_000_000, budgetClass: "XL" },
+        next: "potential",
+      },
+    ],
   },
   {
     id: "budget_fallback",
@@ -311,7 +359,18 @@ export const SCRIPT_STEPS: ScriptStep[] = [
     answers: [
       { id: "p30", label: "30 — Регулярный повторный спрос", patch: { potential: 30 }, next: "segment_branch" },
       { id: "p20", label: "20 — Есть повтор, но нерегулярный", patch: { potential: 20 }, next: "segment_branch" },
-      { id: "p10", label: "10 — Разовый заказ", patch: { potential: 10 }, next: "segment_branch" },
+      {
+        id: "p10",
+        label: "10 — Разовый заказ (целевой)",
+        patch: { potential: 10 },
+        next: "segment_branch",
+      },
+      {
+        id: "p10_nt",
+        label: "10 — разовый, клиент не целевой",
+        patch: { potential: 10, markedNonTargetSmall: true },
+        endFlow: "non_target_c",
+      },
     ],
   },
   {
@@ -442,7 +501,7 @@ export function applyPatch(
 ): QualificationState {
   if (!patch) return state;
   const next = { ...state, ...patch };
-  if (patch.budgetRub !== undefined) {
+  if (patch.budgetRub !== undefined && patch.budgetClass === undefined) {
     next.budgetClass = budgetClassFromRub(patch.budgetRub);
   }
   if (patch.selectionFactors) {
@@ -459,25 +518,47 @@ export function resolveNext(
   state: QualificationState
 ): string | "result" | "non_target" {
   if (answer?.endFlow) return "non_target";
+  if (detectNonTargetFlow(state)) return "non_target";
   if (answer?.next) return answer.next;
   if (step.next) return step.next;
   return "result";
 }
 
+/** По накопленным ответам — сразу на экран завершения с нецелевым клиентом */
+export function detectNonTargetFlow(
+  state: QualificationState
+): NonTargetFlow | null {
+  if (state.hasOgzInterest === false) return "non_target_b";
+  if (state.contractorTimeline === "later") return "non_target_a";
+  if (state.markedNonTargetSmall) return "non_target_c";
+  return null;
+}
+
+export const NON_TARGET_MODULE = {
+  title: "Завершение диалога с нецелевым клиентом",
+  description:
+    "Используется, если на этапе квалификации выяснилось, что клиент не соответствует нашим критериям.",
+};
+
 export const NON_TARGET_TEXTS = {
   non_target_a: {
     title: "Ситуация А",
+    subtitle: "Объект «когда-нибудь потом» / в следующем году",
     managerText:
       "«(Имя), спасибо за откровенность. Мы работаем с проектами, которые находятся в активной фазе стройки и где есть жёсткие сроки. Ваш случай пока больше относится к категории «стратегическое планирование». Чтобы не тратить ваше время сейчас и не забрасывать вас информационным спамом, давайте поступим так: я сделаю пометку в системе, и мы вернёмся к вам через полгода-год, когда у вас появятся конкретные сроки. Вы не против, если я вам напомню о себе?»",
   },
   non_target_b: {
     title: "Ситуация Б",
+    subtitle: "Не занимается огнезащитой (ошибся дверью, не тот отдел)",
     managerText:
       "«(Имя), поняла вас, спасибо за уточнение. Значит, я обратилась не совсем по адресу. Не буду отвлекать вас дальше. Если вдруг у коллег возникнет потребность в огнезащите - буду признательна, если передадите наш контакт. Всего доброго!»",
   },
   non_target_c: {
     title: "Ситуация В",
+    subtitle: "Занимается, но объекты мелкие / разовые (не наш профиль)",
     managerText:
       "«(Имя), спасибо за информацию. Мы, как правило, фокусируемся на более крупных и сложных объектах, чтобы давать клиентам максимальную экспертизу. Ваш объём, скорее всего, будет не самым выгодным для нас с экономической точки зрения, и мы не сможем дать вам лучшее ценовое предложение на рынке. Поэтому, чтобы не вводить вас в заблуждение, предлагаю вам поискать подрядчика, для которого такие объёмы будут профильными. Спасибо за звонок и удачи в поиске!»",
   },
-};
+} as const;
+
+export type NonTargetFlow = keyof typeof NON_TARGET_TEXTS;
