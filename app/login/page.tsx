@@ -21,7 +21,7 @@ function LoginContent() {
   return (
     <div className="mx-auto w-full max-w-md">
       {kicked && (
-        <p className="mb-4 rounded-xl bg-amber-100 px-4 py-3 text-center text-sm text-amber-900">
+        <p className="glass-speech mb-4 rounded-xl px-4 py-3 text-center text-sm text-amber-900">
           Сессия завершена: выполнен вход с другого устройства.
         </p>
       )}

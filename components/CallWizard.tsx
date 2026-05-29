@@ -243,7 +243,7 @@ export function CallWizard() {
         <p className="text-sm text-slate-600">{NON_TARGET_MODULE.description}</p>
         <h3 className="mt-4 text-sm font-bold text-amber-900">{nt.title}</h3>
         <p className="mt-1 text-xs text-amber-800">{nt.subtitle}</p>
-        <p className="mt-3 rounded-xl bg-amber-50 p-4 text-sm leading-relaxed text-amber-950 whitespace-pre-wrap">
+        <p className="glass-speech mt-3 rounded-xl p-4 text-sm leading-relaxed text-amber-950 whitespace-pre-wrap">
           {phrase}
         </p>
         <button
@@ -261,8 +261,8 @@ export function CallWizard() {
     return (
       <ResultLayout title="Итог квалификации" onBack={goBack} canGoBack={history.length > 1}>
         <section className="space-y-4">
-          <div className="rounded-xl bg-brand-500/10 p-4 ring-1 ring-brand-200">
-            <h3 className="text-sm font-semibold text-brand-800">Воронка CRM</h3>
+          <div className="glass-inset rounded-xl p-4">
+            <h3 className="text-sm font-semibold text-brand-700">Воронка CRM</h3>
             <p className="mt-1 text-xl font-bold text-slate-900">{results.funnel.funnelLabel}</p>
             {results.funnel.block && (
               <p className="text-xs text-slate-600">{results.funnel.block}</p>
@@ -275,12 +275,12 @@ export function CallWizard() {
           </div>
 
           <div
-            className={`rounded-xl p-4 ring-1 ${
+            className={`glass-inset rounded-xl p-4 ${
               results.priority.priority === "urgent"
-                ? "bg-emerald-50 ring-emerald-200"
+                ? "border-emerald-200/60"
                 : results.priority.priority === "dont"
-                  ? "bg-red-50 ring-red-200"
-                  : "bg-slate-50 ring-slate-200"
+                  ? "border-red-200/60"
+                  : ""
             }`}
           >
             <h3 className="text-sm font-semibold text-slate-800">Приоритет работы</h3>
@@ -301,7 +301,7 @@ export function CallWizard() {
               <p className="mt-2 text-sm text-slate-800">{results.jtbd.mainTask}</p>
             )}
             {results.phrase && (
-              <p className="mt-3 rounded-lg bg-surface-muted p-3 text-sm italic leading-relaxed">
+              <p className="glass-inset mt-3 rounded-lg p-3 text-sm italic leading-relaxed">
                 {results.phrase}
               </p>
             )}
@@ -335,11 +335,8 @@ export function CallWizard() {
         <span>{step.block}</span>
         <span>{progress}%</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-surface-muted">
-        <div
-          className="h-full rounded-full bg-brand-500 transition-all"
-          style={{ width: `${progress}%` }}
-        />
+      <div className="progress-track">
+        <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
       <div className="card-panel p-6">
@@ -364,7 +361,7 @@ export function CallWizard() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder={step.inputPlaceholder}
-              className="w-full rounded-xl border border-surface-muted px-4 py-3 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+              className="glass-input"
             />
             <button
               type="button"

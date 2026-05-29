@@ -85,7 +85,12 @@ export const SCRIPT_STEPS: ScriptStep[] = [
     hint: "(Клиент отвечает, скорее всего, «да» - это первое согласие).",
     answers: [
       { id: "yes", label: "Да", patch: { hasOgzInterest: true }, next: "open_2" },
-      { id: "no", label: "Нет / не та тема", patch: { hasOgzInterest: false }, endFlow: "non_target_b" },
+      {
+        id: "no",
+        label: "Нет, огнезащита не требуется",
+        patch: { hasOgzInterest: false },
+        endFlow: "non_target_b",
+      },
     ],
   },
   {
@@ -133,7 +138,7 @@ export const SCRIPT_STEPS: ScriptStep[] = [
       { id: "other", label: "Другое (зафиксировать)", next: "obj_type" },
       {
         id: "not_ogz",
-        label: "Не про огнезащиту / ошиблись номером",
+        label: "Другая тема / не тот отдел",
         patch: { hasOgzInterest: false },
         endFlow: "non_target_b",
       },
@@ -182,7 +187,7 @@ export const SCRIPT_STEPS: ScriptStep[] = [
       { id: "known", label: "Озвучил масштаб — перейти к бюджету", next: "budget_main" },
       {
         id: "small",
-        label: "Мелкий объём / разовый заказ (не наш профиль)",
+        label: "Небольшой объём, разовый объект",
         patch: { potential: 10, markedNonTargetSmall: true },
         endFlow: "non_target_c",
       },
@@ -248,7 +253,7 @@ export const SCRIPT_STEPS: ScriptStep[] = [
     answers: [
       {
         id: "foundation",
-        label: "Только фундамент / сроков пока нет",
+        label: "Пока только фундамент, сроки не определены",
         patch: { readiness: "cold" },
         endFlow: "non_target_a",
       },
@@ -286,7 +291,12 @@ export const SCRIPT_STEPS: ScriptStep[] = [
       { id: "3m", label: "До 3 месяцев", next: "timing_contractor" },
       { id: "3_6", label: "3–6 месяцев", next: "timing_contractor" },
       { id: "6p", label: "6+ месяцев", next: "timing_contractor" },
-      { id: "later", label: "Когда-нибудь / в следующем году", patch: { contractorTimeline: "later" }, endFlow: "non_target_a" },
+      {
+        id: "later",
+        label: "В следующем году / когда-нибудь",
+        patch: { contractorTimeline: "later" },
+        endFlow: "non_target_a",
+      },
     ],
   },
   {
@@ -361,13 +371,13 @@ export const SCRIPT_STEPS: ScriptStep[] = [
       { id: "p20", label: "20 — Есть повтор, но нерегулярный", patch: { potential: 20 }, next: "segment_branch" },
       {
         id: "p10",
-        label: "10 — Разовый заказ (целевой)",
+        label: "10 — разовый заказ",
         patch: { potential: 10 },
         next: "segment_branch",
       },
       {
         id: "p10_nt",
-        label: "10 — разовый, клиент не целевой",
+        label: "Разовый объект, без перспективы повтора",
         patch: { potential: 10, markedNonTargetSmall: true },
         endFlow: "non_target_c",
       },

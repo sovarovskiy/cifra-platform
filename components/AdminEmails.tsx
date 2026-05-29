@@ -84,7 +84,7 @@ export function AdminEmails() {
           доступ. Главного администратора из настроек сервера удалить нельзя.
         </p>
         {persistWarning && (
-          <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <p className="glass-speech mt-3 rounded-xl px-4 py-3 text-sm text-amber-900">
             {persistWarning}
           </p>
         )}
@@ -97,7 +97,7 @@ export function AdminEmails() {
               required
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-surface-muted px-4 py-2.5 text-sm"
+              className="glass-input mt-1"
               placeholder="manager@company.ru"
             />
           </label>

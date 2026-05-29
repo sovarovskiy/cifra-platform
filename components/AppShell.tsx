@@ -21,7 +21,7 @@ export function AppShell({ email, isAdmin, children }: Props) {
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-20 border-b border-white/40 bg-white/70 backdrop-blur-md">
+      <header className="glass-nav sticky top-0 z-20">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-3">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-brand-600">
@@ -32,14 +32,14 @@ export function AppShell({ email, isAdmin, children }: Props) {
           <nav className="flex items-center gap-2">
             <Link
               href="/"
-              className={`btn-ghost ${pathname === "/" ? "bg-brand-50 text-brand-700" : ""}`}
+              className={`btn-ghost ${pathname === "/" ? "nav-link-active" : ""}`}
             >
               Звонок
             </Link>
             {isAdmin && (
               <Link
                 href="/admin"
-                className={`btn-ghost ${pathname === "/admin" ? "bg-brand-50 text-brand-700" : ""}`}
+                className={`btn-ghost ${pathname === "/admin" ? "nav-link-active" : ""}`}
               >
                 Доступ
               </Link>

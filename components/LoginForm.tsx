@@ -88,7 +88,7 @@ export function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-surface-muted bg-white px-4 py-3 text-sm outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+                className="glass-input mt-1"
                 placeholder="name@company.ru"
               />
             </label>
@@ -103,7 +103,7 @@ export function LoginForm() {
               Код для <strong>{email}</strong>
             </p>
             {info && (
-              <p className="rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-800">{info}</p>
+              <p className="glass-inset rounded-lg px-3 py-2 text-xs text-brand-800">{info}</p>
             )}
             {devCode && (
               <p className="rounded-xl bg-slate-900 px-4 py-3 text-center text-2xl font-bold tracking-[0.3em] text-white">
@@ -120,7 +120,7 @@ export function LoginForm() {
                 required
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                className="mt-1 w-full rounded-xl border border-surface-muted bg-white px-4 py-3 text-center text-lg tracking-widest outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
+                className="glass-input mt-1 text-center text-lg tracking-widest"
               />
             </label>
             {error && <p className="text-sm text-red-600">{error}</p>}

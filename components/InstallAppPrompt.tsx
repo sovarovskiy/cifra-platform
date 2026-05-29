@@ -70,7 +70,7 @@ export function InstallAppPrompt({
           : "fixed bottom-0 left-0 right-0 z-30 border-t border-brand-200 bg-white/95 p-4 shadow-lg backdrop-blur-md"
       }
     >
-      <div className={isWelcome ? "bg-gradient-to-br from-brand-500 to-brand-700 p-6 text-white" : ""}>
+      <div className={isWelcome ? "bg-accent-gradient p-6 text-white" : ""}>
         <div className={isWelcome ? "" : "mx-auto max-w-4xl"}>
           <p
             className={
