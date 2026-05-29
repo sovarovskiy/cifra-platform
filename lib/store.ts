@@ -1,4 +1,5 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 
 export type AllowedEmail = {
@@ -20,18 +21,55 @@ type StoreData = {
   sessions: SessionRow[];
 };
 
-const dataDir = path.join(process.cwd(), "data");
-const storePath = path.join(dataDir, "store.json");
+let storePathCache: string | null = null;
 
 function defaultStore(): StoreData {
   return { allowed_emails: [], sessions: [] };
 }
 
-function readStore(): StoreData {
+function norm(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+/** На Vercel диск только для чтения — пишем в /tmp */
+function resolveStorePath(): string {
+  if (storePathCache) return storePathCache;
+
+  const isServerless =
+    process.env.VERCEL === "1" ||
+    !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    !!process.env.VERCEL_ENV;
+
+  if (isServerless) {
+    storePathCache = path.join(os.tmpdir(), "cifra-store.json");
+    return storePathCache;
+  }
+
+  const localPath = path.join(process.cwd(), "data", "store.json");
   try {
-    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    const dir = path.dirname(localPath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(localPath)) {
+      fs.writeFileSync(localPath, JSON.stringify(defaultStore(), null, 2), "utf-8");
+    } else {
+      fs.accessSync(dir, fs.constants.W_OK);
+    }
+    storePathCache = localPath;
+    return localPath;
+  } catch {
+    storePathCache = path.join(os.tmpdir(), "cifra-store.json");
+    return storePathCache;
+  }
+}
+
+function readStore(): StoreData {
+  const storePath = resolveStorePath();
+  try {
+    const dir = path.dirname(storePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     if (!fs.existsSync(storePath)) {
       writeStore(defaultStore());
+      return defaultStore();
     }
     const raw = fs.readFileSync(storePath, "utf-8");
     const data = JSON.parse(raw) as StoreData;
@@ -45,15 +83,36 @@ function readStore(): StoreData {
 }
 
 function writeStore(data: StoreData): void {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  fs.writeFileSync(storePath, JSON.stringify(data, null, 2), "utf-8");
+  let storePath = resolveStorePath();
+  const payload = JSON.stringify(data, null, 2);
+
+  try {
+    const dir = path.dirname(storePath);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(storePath, payload, "utf-8");
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException;
+    if (err.code === "EROFS" || err.code === "EACCES") {
+      storePathCache = path.join(os.tmpdir(), "cifra-store.json");
+      storePath = storePathCache;
+      const dir = path.dirname(storePath);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(storePath, payload, "utf-8");
+      return;
+    }
+    throw e;
+  }
 }
 
-function norm(email: string): string {
-  return email.trim().toLowerCase();
+function parseEmailsFromEnv(value: string | undefined): string[] {
+  if (!value?.trim()) return [];
+  return value
+    .split(/[,;\s]+/)
+    .map((e) => norm(e))
+    .filter(Boolean);
 }
 
-/** Главный админ из .env — всегда в списке с правами admin (нельзя удалить через UI) */
+/** Главный админ из .env */
 export function getRootAdminEmail(): string | null {
   const admin = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   return admin || null;
@@ -64,24 +123,39 @@ export function isRootAdmin(email: string): boolean {
   return !!root && norm(email) === root;
 }
 
+/** Синхронизация почт из ADMIN_EMAIL и ALLOWED_EMAILS (для Vercel) */
 export function ensureAdminSeed(): void {
-  const admin = getRootAdminEmail();
-  if (!admin) return;
-  const data = readStore();
-  const idx = data.allowed_emails.findIndex((e) => norm(e.email) === admin);
-  if (idx >= 0) {
-    if (!data.allowed_emails[idx].is_admin) {
-      data.allowed_emails[idx].is_admin = true;
-      writeStore(data);
-    }
-    return;
+  const fromEnv = new Set<string>();
+  const root = getRootAdminEmail();
+  if (root) fromEnv.add(root);
+  for (const e of parseEmailsFromEnv(process.env.ALLOWED_EMAILS)) {
+    fromEnv.add(e);
   }
-  data.allowed_emails.push({
-    email: admin,
-    is_admin: true,
-    created_at: new Date().toISOString(),
-  });
-  writeStore(data);
+
+  if (fromEnv.size === 0) return;
+
+  const data = readStore();
+  let changed = false;
+
+  for (const email of fromEnv) {
+    const isRoot = email === root;
+    const idx = data.allowed_emails.findIndex((e) => norm(e.email) === email);
+    if (idx >= 0) {
+      if (isRoot && !data.allowed_emails[idx].is_admin) {
+        data.allowed_emails[idx].is_admin = true;
+        changed = true;
+      }
+    } else {
+      data.allowed_emails.push({
+        email,
+        is_admin: isRoot,
+        created_at: new Date().toISOString(),
+      });
+      changed = true;
+    }
+  }
+
+  if (changed) writeStore(data);
 }
 
 export function listAllowedEmails(): AllowedEmail[] {
