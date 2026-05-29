@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { issueLoginCode, isEmailAllowed, normalizeEmail } from "@/lib/auth";
+import { issueLoginCode, isEmailAllowed, normalizeEmail, OTP_COOKIE_NAME } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -12,17 +12,29 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error:
-            "Доступ запрещён. Проверьте ADMIN_EMAIL в .env и перезапустите сервер.",
+            "Доступ запрещён. Почта должна быть в списке (ADMIN_EMAIL / ALLOWED_EMAILS на сервере).",
         },
         { status: 403 }
       );
     }
-    const code = issueLoginCode(normalized);
-    return NextResponse.json({
+
+    const { code, otpCookie } = issueLoginCode(normalized);
+    const res = NextResponse.json({
       ok: true,
-      message: "Код показан на экране ниже.",
+      message: "Код показан на экране ниже. Введите его в течение 10 минут.",
       devCode: code,
     });
+
+    const secure = process.env.NODE_ENV === "production";
+    res.cookies.set(OTP_COOKIE_NAME, otpCookie.value, {
+      httpOnly: true,
+      secure,
+      sameSite: "lax",
+      path: "/",
+      maxAge: otpCookie.maxAge,
+    });
+
+    return res;
   } catch (e) {
     console.error("[Цифра] request-code:", e);
     return NextResponse.json(

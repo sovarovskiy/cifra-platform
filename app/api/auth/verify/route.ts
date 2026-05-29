@@ -1,10 +1,12 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
-  consumeLoginCode,
   createSession,
   isEmailAllowed,
   normalizeEmail,
+  OTP_COOKIE_NAME,
   setSessionCookies,
+  verifyLoginCode,
 } from "@/lib/auth";
 
 export async function POST(req: Request) {
@@ -24,15 +26,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Доступ запрещён" }, { status: 403 });
     }
 
-    if (!consumeLoginCode(normalized, code)) {
+    const cookieStore = await cookies();
+    const otpCookie = cookieStore.get(OTP_COOKIE_NAME)?.value;
+
+    if (!verifyLoginCode(normalized, code, otpCookie)) {
       return NextResponse.json(
-        { error: "Неверный или просроченный код. Запросите новый." },
+        {
+          error:
+            "Неверный или просроченный код. Нажмите «Другой email» или запросите код заново.",
+        },
         { status: 401 }
       );
     }
 
     const token = createSession(normalized, deviceId);
     const res = NextResponse.json({ ok: true, email: normalized });
+
     for (const c of setSessionCookies(token, deviceId)) {
       res.cookies.set(
         c.name,
@@ -40,6 +49,9 @@ export async function POST(req: Request) {
         c.options as Parameters<typeof res.cookies.set>[2]
       );
     }
+
+    res.cookies.set(OTP_COOKIE_NAME, "", { path: "/", maxAge: 0 });
+
     return res;
   } catch (e) {
     console.error("[Цифра] verify:", e);
@@ -48,7 +60,7 @@ export async function POST(req: Request) {
         error:
           e instanceof Error
             ? e.message
-            : "Ошибка сервера при входе. Перезапустите npm run dev.",
+            : "Ошибка сервера при входе.",
       },
       { status: 500 }
     );

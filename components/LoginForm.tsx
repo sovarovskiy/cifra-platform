@@ -20,6 +20,7 @@ export function LoginForm() {
     const res = await fetch("/api/auth/request-code", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ email }),
     });
     let data: { error?: string; message?: string; devCode?: string } = {};
@@ -47,6 +48,7 @@ export function LoginForm() {
     const res = await fetch("/api/auth/verify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
       body: JSON.stringify({ email, code, deviceId: getDeviceId() }),
     });
     let data: { error?: string } = {};
@@ -117,7 +119,7 @@ export function LoginForm() {
                 maxLength={6}
                 required
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                 className="mt-1 w-full rounded-xl border border-surface-muted bg-white px-4 py-3 text-center text-lg tracking-widest outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-100"
               />
             </label>

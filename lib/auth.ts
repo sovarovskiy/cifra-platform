@@ -1,4 +1,4 @@
-import { randomBytes } from "crypto";
+import { createHmac, randomBytes, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import {
   createSessionRow,
@@ -9,7 +9,34 @@ import {
 } from "./store";
 
 const COOKIE_NAME = "cifra_session";
+const OTP_COOKIE_NAME = "cifra_otp";
 const SESSION_DAYS = 14;
+const OTP_MINUTES = 10;
+
+function secret(): string {
+  const s = process.env.SESSION_SECRET;
+  if (!s || s.length < 8) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("SESSION_SECRET must be set in environment variables");
+    }
+    return "cifra-dev-fallback-secret-not-for-production";
+  }
+  return s;
+}
+
+function signOtp(email: string, code: string, expiresAt: number): string {
+  return createHmac("sha256", secret())
+    .update(`${normalizeEmail(email)}:${code.trim()}:${expiresAt}`)
+    .digest("hex");
+}
+
+function safeEqualHex(a: string, b: string): boolean {
+  try {
+    return timingSafeEqual(Buffer.from(a, "hex"), Buffer.from(b, "hex"));
+  } catch {
+    return false;
+  }
+}
 
 export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -101,31 +128,70 @@ export function clearSessionCookies(): { name: string; options: object }[] {
   ];
 }
 
-const pendingCodes = new Map<
-  string,
-  { code: string; expires: number }
->();
-
-export function issueLoginCode(email: string): string {
+/** Код + cookie для проверки (работает на Vercel без общей памяти между запросами) */
+export function issueLoginCode(email: string): {
+  code: string;
+  otpCookie: { value: string; maxAge: number };
+} {
   const code = String(Math.floor(100000 + Math.random() * 900000));
-  pendingCodes.set(normalizeEmail(email), {
-    code,
-    expires: Date.now() + 10 * 60 * 1000,
-  });
+  const exp = Date.now() + OTP_MINUTES * 60 * 1000;
+  const sig = signOtp(email, code, exp);
+  const payload = Buffer.from(
+    JSON.stringify({ e: normalizeEmail(email), exp, sig }),
+    "utf-8"
+  ).toString("base64url");
+
   console.log(`[Цифра] Код входа для ${email}: ${code}`);
-  return code;
+
+  return {
+    code,
+    otpCookie: {
+      value: payload,
+      maxAge: OTP_MINUTES * 60,
+    },
+  };
 }
 
-export function consumeLoginCode(email: string, code: string): boolean {
-  const key = normalizeEmail(email);
-  const pending = pendingCodes.get(key);
-  if (!pending || pending.expires < Date.now()) {
-    pendingCodes.delete(key);
+export function verifyLoginCode(
+  email: string,
+  code: string,
+  otpCookieValue: string | undefined
+): boolean {
+  if (!otpCookieValue) return false;
+
+  try {
+    const parsed = JSON.parse(
+      Buffer.from(otpCookieValue, "base64url").toString("utf-8")
+    ) as { e: string; exp: number; sig: string };
+
+    const normalized = normalizeEmail(email);
+    if (parsed.e !== normalized) return false;
+    if (Date.now() > parsed.exp) return false;
+
+    const expected = signOtp(email, code, parsed.exp);
+    return safeEqualHex(parsed.sig, expected);
+  } catch {
     return false;
   }
-  if (pending.code !== code.trim()) return false;
-  pendingCodes.delete(key);
-  return true;
 }
 
-export { COOKIE_NAME };
+export function otpCookieOptions(maxAge: number): {
+  name: string;
+  value: string;
+  options: object;
+} {
+  const secure = process.env.NODE_ENV === "production";
+  return {
+    name: OTP_COOKIE_NAME,
+    value: "",
+    options: {
+      httpOnly: true,
+      secure,
+      sameSite: "lax" as const,
+      path: "/",
+      maxAge,
+    },
+  };
+}
+
+export { COOKIE_NAME, OTP_COOKIE_NAME };
