@@ -587,18 +587,18 @@ a.sales-breadcrumb:hover {
   margin-top: 0.85rem;
 }
 
-.jtbd-pdf-wrap {
-  margin-top: 0.75rem;
-  overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #f8f9fa;
+.jtbd-images {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.jtbd-pdf-frame {
+.jtbd-page-image {
   display: block;
   width: 100%;
-  min-height: 70vh;
-  border: 0;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   background: #fff;
+  box-shadow: 0 4px 16px rgba(26, 32, 44, 0.06);
 }

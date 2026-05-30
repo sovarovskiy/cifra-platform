@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { JtbdPdfViewer } from "@/components/JtbdPdfViewer";
+import { JtbdSegmentImages } from "@/components/JtbdSegmentImages";
 import { getCurrentUser } from "@/lib/auth";
 import { resolveJtbd } from "@/lib/jtbd";
 
@@ -38,9 +38,7 @@ export default async function JtbdSegmentPage({ params }: Props) {
             </p>
           )}
 
-          {segment.pdfUrl && (
-            <JtbdPdfViewer url={segment.pdfUrl} title={`JTBD ${segment.id}`} />
-          )}
+          <JtbdSegmentImages urls={segment.imageUrls} title={segment.title} />
 
           {segment.mainTask && (
             <section className="info-section">

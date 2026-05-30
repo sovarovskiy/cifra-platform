@@ -39,7 +39,7 @@ export default async function JtbdPage() {
               href={`/jtbd/${encodeURIComponent(segment.id)}`}
               meta={segment.id}
               title={segment.title}
-              subtitle="PDF-разбор"
+              subtitle="Разбор с картинками"
             />
           ))}
         </nav>

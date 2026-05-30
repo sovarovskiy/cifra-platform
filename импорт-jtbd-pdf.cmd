@@ -1,23 +1,34 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-title Импорт PDF для JTBD
+title Импорт JTBD: PDF и картинки
 
 echo.
-echo  Копирование PDF из папки «JTBD в картинках» на рабочий стол...
+echo  1. Копируем PDF с рабочего стола
+echo  2. Конвертируем каждую страницу в PNG для приложения
 echo.
+
+call npm install
+if errorlevel 1 (
+  echo ОШИБКА: npm install
+  pause
+  exit /b 1
+)
 
 node scripts/import-jtbd-pdfs.mjs
 if errorlevel 1 (
   echo.
-  echo ОШИБКА. Проверьте, что папка существует:
+  echo ОШИБКА. Проверьте папку:
   echo   %%USERPROFILE%%\OneDrive\Рабочий стол\JTBD в картинках
   pause
   exit /b 1
 )
 
 echo.
-echo [OK] PDF скопированы в public\jtbd\pdfs\
-echo Теперь можно деплоить на Vercel.
+echo [OK] PDF в public\jtbd\pdfs\
+echo [OK] Картинки в public\jtbd\images\
+echo [OK] Список страниц в data\jtbd-images.json
+echo.
+echo Дальше: git add -A ^&^& git commit ^&^& git push
 echo.
 pause

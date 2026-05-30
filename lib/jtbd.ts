@@ -1,4 +1,5 @@
 import jtbdData from "@/data/jtbd.json";
+import jtbdImages from "@/data/jtbd-images.json";
 
 export type JtbdEntry = {
   title: string;
@@ -14,7 +15,7 @@ export type JtbdSegment = {
   salesLanguage?: string;
   inherits?: string;
   baseId?: string;
-  pdfUrl?: string;
+  imageUrls: string[];
 };
 
 /** Сегменты с PDF-разборами «деловой» */
@@ -40,26 +41,27 @@ const PDF_SOURCE_NAMES: Record<JtbdPdfSegmentId, string> = {
   "E-05": "E-05 деловой.pdf",
 };
 
-export function getJtbdPdfPublicUrl(segmentId: string): string | undefined {
-  if (JTBD_PDF_SEGMENT_IDS.includes(segmentId as JtbdPdfSegmentId)) {
-    return `/jtbd/pdfs/${segmentId}.pdf`;
-  }
-  const raw = (jtbdData as Record<string, JtbdEntry>)[segmentId];
-  if (raw?.inherits) {
-    return getJtbdPdfPublicUrl(raw.inherits);
-  }
-  return undefined;
-}
+const imageManifest = jtbdImages as Record<string, string[]>;
 
 export function getJtbdPdfSourceName(segmentId: JtbdPdfSegmentId): string {
   return PDF_SOURCE_NAMES[segmentId];
+}
+
+export function getJtbdImageUrls(segmentId: string): string[] {
+  const direct = imageManifest[segmentId];
+  if (direct?.length) return direct;
+
+  const raw = (jtbdData as Record<string, JtbdEntry>)[segmentId];
+  if (raw?.inherits) return getJtbdImageUrls(raw.inherits);
+
+  return imageManifest[segmentId] ?? [];
 }
 
 export function resolveJtbd(id: string): JtbdSegment | undefined {
   const raw = (jtbdData as Record<string, JtbdEntry>)[id];
   if (!raw) return undefined;
 
-  const pdfUrl = getJtbdPdfPublicUrl(id);
+  const imageUrls = getJtbdImageUrls(id);
 
   if (raw.mainTask) {
     return {
@@ -67,13 +69,13 @@ export function resolveJtbd(id: string): JtbdSegment | undefined {
       title: raw.title,
       mainTask: raw.mainTask,
       salesLanguage: raw.salesLanguage,
-      pdfUrl,
+      imageUrls,
     };
   }
 
   if (raw.inherits) {
     const base = resolveJtbd(raw.inherits);
-    if (!base) return { id, title: raw.title, inherits: raw.inherits, pdfUrl };
+    if (!base) return { id, title: raw.title, inherits: raw.inherits, imageUrls };
     return {
       id,
       title: raw.title,
@@ -81,11 +83,11 @@ export function resolveJtbd(id: string): JtbdSegment | undefined {
       baseId: raw.inherits,
       mainTask: base.mainTask,
       salesLanguage: base.salesLanguage,
-      pdfUrl,
+      imageUrls,
     };
   }
 
-  return { id, title: raw.title, pdfUrl };
+  return { id, title: raw.title, imageUrls };
 }
 
 export function listJtbdPdfSegments(): JtbdSegment[] {
