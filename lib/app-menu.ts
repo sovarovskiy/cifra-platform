@@ -24,6 +24,12 @@ export const APP_MENU_ITEMS: AppMenuItem[] = [
     description: "Сегменты клиентов: задачи и язык продаж",
     href: "/jtbd",
   },
+  {
+    id: "our-objects",
+    title: "Наши объекты",
+    description: "Примеры реализованных проектов",
+    href: "/our-objects",
+  },
 ];
 
 export function isMenuHome(pathname: string): boolean {
@@ -40,4 +46,8 @@ export function isSalesModel(pathname: string): boolean {
 
 export function isJtbd(pathname: string): boolean {
   return pathname.startsWith("/jtbd");
+}
+
+export function isOurObjects(pathname: string): boolean {
+  return pathname.startsWith("/our-objects");
 }
