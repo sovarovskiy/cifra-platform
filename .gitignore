@@ -2,6 +2,7 @@ node_modules
 .next
 data/*.db
 data/store.json
+data/calls.json
 .env
 .env.local
 *.log

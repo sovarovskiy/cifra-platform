@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { AdminEmails } from "@/components/AdminEmails";
+import { AdminPanel } from "@/components/AdminPanel";
 import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export default async function AdminPage() {
 
   return (
     <AppShell isAdmin={user.isAdmin}>
-      <AdminEmails />
+      <AdminPanel />
     </AppShell>
   );
 }

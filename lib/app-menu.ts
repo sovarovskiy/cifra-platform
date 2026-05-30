@@ -38,8 +38,17 @@ export const APP_MENU_ITEMS: AppMenuItem[] = [
   },
 ];
 
-export function isMenuHome(pathname: string): boolean {
+export function isAppHome(pathname: string): boolean {
   return pathname === "/";
+}
+
+export function isMenuPage(pathname: string): boolean {
+  return pathname === "/menu";
+}
+
+/** @deprecated use isMenuPage */
+export function isMenuHome(pathname: string): boolean {
+  return isMenuPage(pathname);
 }
 
 export function isOgzScript(pathname: string): boolean {

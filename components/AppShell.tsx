@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { KeyRound, LayoutGrid, LogOut } from "lucide-react";
 import { HomeButton } from "@/components/HomeButton";
-import { isMenuHome } from "@/lib/app-menu";
+import { isAppHome, isMenuPage } from "@/lib/app-menu";
 
 type Props = {
   isAdmin: boolean;
@@ -14,7 +14,8 @@ type Props = {
 export function AppShell({ isAdmin, children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
-  const onMenu = isMenuHome(pathname);
+  const onMenu = isMenuPage(pathname);
+  const onAppHome = isAppHome(pathname);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -32,7 +33,7 @@ export function AppShell({ isAdmin, children }: Props) {
           </div>
           <nav className="flex items-center gap-3" aria-label="Навигация">
             <Link
-              href="/"
+              href="/menu"
               className={`header-icon-btn ${onMenu ? "header-icon-btn--active" : ""}`}
               aria-label="Меню"
               title="Меню"
@@ -63,7 +64,7 @@ export function AppShell({ isAdmin, children }: Props) {
       </header>
       <main className="mx-auto max-w-lg min-w-0 px-4 pb-8 pt-4">
         {children}
-        {!onMenu && <HomeButton />}
+        {!onAppHome && <HomeButton />}
       </main>
     </div>
   );

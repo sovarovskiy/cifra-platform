@@ -1,4 +1,4 @@
-const CACHE = "cifra-v4";
+const CACHE = "cifra-v5";
 
 const PRECACHE = ["/login"];
 

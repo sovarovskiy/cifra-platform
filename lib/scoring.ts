@@ -90,6 +90,19 @@ const FUNNEL_LABELS: Record<FunnelId, string> = {
   simplified: "ОГЗ / упрощённая",
 };
 
+export const FUNNEL_ORDER: FunnelId[] = [
+  "focus",
+  "longterm",
+  "development",
+  "not_sql",
+  "reserve",
+  "simplified",
+];
+
+export function getFunnelLabel(id: FunnelId): string {
+  return FUNNEL_LABELS[id];
+}
+
 function timelineMonths(t: ContractorTimeline | undefined): number | null {
   if (!t) return null;
   if (t === "1m") return 1;
@@ -295,6 +308,12 @@ export function calculateFunnel(s: QualificationState): FunnelResult {
 }
 
 export type NonTargetFlowId = "non_target_a" | "non_target_b" | "non_target_c";
+
+export function funnelIdFromNonTarget(flow: NonTargetFlowId): FunnelId {
+  if (flow === "non_target_a") return "longterm";
+  if (flow === "non_target_b") return "reserve";
+  return "not_sql";
+}
 
 export type NonTargetResult = {
   situationTitle: string;

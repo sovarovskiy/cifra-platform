@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   applyPatch,
@@ -14,7 +14,7 @@ import {
   type AnswerOption,
   type NonTargetFlow,
 } from "@/lib/script-engine";
-import type { QualificationState } from "@/lib/scoring";
+import type { NonTargetFlowId, QualificationState } from "@/lib/scoring";
 import {
   calculateFunnel,
   calculateNonTargetResult,
@@ -69,6 +69,7 @@ export function CallWizard() {
   });
   const [nonTarget, setNonTarget] = useState<NonTargetFlow | null>(null);
   const [finished, setFinished] = useState(false);
+  const savedCompletionRef = useRef(false);
 
   const step = getStep(stepId);
 
@@ -231,6 +232,47 @@ export function CallWizard() {
 
     return { funnel, priority, segment, phrase, jtbd: jtbdResolved, jtbdTitle: jtbd?.title };
   }, [finished, state]);
+
+  const persistCompletion = useCallback(
+    async (payload: {
+      outcomeType: "target" | "non_target";
+      nonTargetFlow?: NonTargetFlowId;
+    }) => {
+      if (savedCompletionRef.current) return;
+      savedCompletionRef.current = true;
+      try {
+        const res = await fetch("/api/wizard/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            state,
+            outcomeType: payload.outcomeType,
+            nonTargetFlow: payload.nonTargetFlow,
+          }),
+        });
+        if (!res.ok) savedCompletionRef.current = false;
+      } catch {
+        savedCompletionRef.current = false;
+      }
+    },
+    [state]
+  );
+
+  useEffect(() => {
+    if (finished && results) {
+      persistCompletion({ outcomeType: "target" });
+    }
+  }, [finished, results, persistCompletion]);
+
+  useEffect(() => {
+    if (nonTarget) {
+      persistCompletion({
+        outcomeType: "non_target",
+        nonTargetFlow: nonTarget as NonTargetFlowId,
+      });
+    }
+  }, [nonTarget, persistCompletion]);
 
   const showWizardBack =
     stepId !== START_STEP && history.length > 1 && !finished && !nonTarget;

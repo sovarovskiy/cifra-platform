@@ -4,7 +4,7 @@ cd /d "%~dp0"
 title Обновление Цифра на Vercel
 
 echo.
-echo  === Отправка кода на GitHub (Vercel подхватит сам) ===
+echo  === 1. Проверка git ===
 echo.
 
 git status --short
@@ -14,16 +14,35 @@ if errorlevel 1 (
   exit /b 1
 )
 
+git check-ignore -v .env.local >nul 2>&1
+if errorlevel 1 (
+  echo ВНИМАНИЕ: .env.local не в .gitignore!
+  pause
+  exit /b 1
+)
+
+echo.
+echo  === 2. Сборка (проверка перед push) ===
+echo.
+
+call npm install
+if errorlevel 1 goto :fail
+
+call npm run build
+if errorlevel 1 goto :fail
+
+echo.
+echo  === 3. Коммит и push на GitHub ===
+echo.
+
 git add -A
 git reset HEAD .env.local 2>nul
+git reset HEAD "cifra-platform-*.json" 2>nul
+
 git diff --cached --quiet
 if errorlevel 1 (
-  git commit -m "Обновление платформы Цифра"
-  if errorlevel 1 (
-    echo ОШИБКА: коммит не создан
-    pause
-    exit /b 1
-  )
+  git commit -m "Главная страница, меню в шапке, референс, PWA-кэш"
+  if errorlevel 1 goto :fail
   echo [OK] Коммит создан
 ) else (
   echo [--] Нет новых изменений для коммита
@@ -47,6 +66,13 @@ echo.
 echo  [OK] Код на GitHub.
 echo.
 echo  Vercel: https://vercel.com -^> проект cifra-platform -^> Deployments
-echo  Дождитесь статуса Ready (1-3 мин), затем откройте сайт /login
+echo  Дождитесь статуса Ready (1-3 мин), затем на телефоне закройте PWA и откройте снова.
 echo.
 pause
+exit /b 0
+
+:fail
+echo.
+echo ОШИБКА на одном из шагов.
+pause
+exit /b 1
