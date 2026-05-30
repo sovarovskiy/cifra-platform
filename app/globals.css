@@ -603,9 +603,27 @@ a.sales-breadcrumb:hover {
   box-shadow: 0 4px 16px rgba(26, 32, 44, 0.06);
 }
 
+.reference-table-fit {
+  margin-top: 1rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.reference-table-fit-inner {
+  transform-origin: top left;
+  width: max-content;
+  max-width: none;
+  will-change: transform;
+}
+
 .reference-table-wrap {
   margin-top: 1rem;
-  overflow: auto;
+  overflow: hidden;
   max-width: 100%;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -613,9 +631,8 @@ a.sales-breadcrumb:hover {
 
 .reference-table {
   width: max-content;
-  min-width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.35;
   color: var(--color-text);
   background: #fff;
@@ -624,15 +641,12 @@ a.sales-breadcrumb:hover {
 .reference-table th,
 .reference-table td {
   border: 1px solid #e2e8f0;
-  padding: 8px 10px;
+  padding: 6px 8px;
   vertical-align: top;
   white-space: nowrap;
 }
 
 .reference-table th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
   background: #f0f7f7;
   color: var(--color-primary);
   font-weight: 600;
@@ -641,6 +655,27 @@ a.sales-breadcrumb:hover {
 
 .reference-table tbody tr:nth-child(even) td {
   background: #fafbfc;
+}
+
+.reference-page {
+  overflow-x: clip;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.reference-embed-fit {
+  margin-top: 1rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+}
+
+.reference-embed-fit-inner {
+  transform-origin: top left;
 }
 
 .reference-embed-wrap {
@@ -653,7 +688,7 @@ a.sales-breadcrumb:hover {
 
 .reference-embed-frame {
   display: block;
-  width: 100%;
-  min-height: 70vh;
+  width: 1100px;
+  height: 900px;
   border: 0;
 }

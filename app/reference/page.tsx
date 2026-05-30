@@ -17,10 +17,10 @@ export default async function ReferencePage() {
 
   return (
     <AppShell isAdmin={user.isAdmin}>
-      <div className="flex min-h-[calc(100dvh-5.5rem)] flex-col">
+      <div className="flex min-h-[calc(100dvh-5.5rem)] min-w-0 flex-col">
         <p className="text-step-label">Референс</p>
 
-        <article className="content-card info-article mt-4 flex-1">
+        <article className="content-card info-article reference-page mt-4 min-w-0 flex-1">
           <h1 className="text-brand-title text-lg">{REFERENCE_SHEET_TITLE}</h1>
           <p className="text-hint mt-2">
             Актуальные данные из Google Таблицы — только просмотр, без формул
