@@ -18,6 +18,12 @@ export const APP_MENU_ITEMS: AppMenuItem[] = [
     description: "Воронка и этапы работы с клиентом",
     href: "/sales-model",
   },
+  {
+    id: "jtbd",
+    title: "JTBD",
+    description: "Сегменты клиентов: задачи и язык продаж",
+    href: "/jtbd",
+  },
 ];
 
 export function isMenuHome(pathname: string): boolean {
@@ -30,4 +36,8 @@ export function isOgzScript(pathname: string): boolean {
 
 export function isSalesModel(pathname: string): boolean {
   return pathname.startsWith("/sales-model");
+}
+
+export function isJtbd(pathname: string): boolean {
+  return pathname.startsWith("/jtbd");
 }
