@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
+import { JtbdPdfViewer } from "@/components/JtbdPdfViewer";
 import { getCurrentUser } from "@/lib/auth";
 import { resolveJtbd } from "@/lib/jtbd";
 
@@ -21,7 +22,7 @@ export default async function JtbdSegmentPage({ params }: Props) {
       <div className="flex min-h-[calc(100dvh-5.5rem)] flex-col">
         <p className="text-step-label">JTBD · {segment.id}</p>
         <Link href="/jtbd" className="info-breadcrumb mt-2">
-          ← Все сегменты
+          ← Раздел JTBD
         </Link>
 
         <article className="content-card info-article mt-4 flex-1">
@@ -35,6 +36,10 @@ export default async function JtbdSegmentPage({ params }: Props) {
                 {segment.inherits}
               </Link>
             </p>
+          )}
+
+          {segment.pdfUrl && (
+            <JtbdPdfViewer url={segment.pdfUrl} title={`JTBD ${segment.id}`} />
           )}
 
           {segment.mainTask && (

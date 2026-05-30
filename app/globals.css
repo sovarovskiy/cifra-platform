@@ -582,3 +582,23 @@ a.sales-breadcrumb:hover {
 .sales-content .sales-list li + li {
   margin-top: 0.35rem;
 }
+
+.info-prose .info-paragraph + .info-paragraph {
+  margin-top: 0.85rem;
+}
+
+.jtbd-pdf-wrap {
+  margin-top: 0.75rem;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8f9fa;
+}
+
+.jtbd-pdf-frame {
+  display: block;
+  width: 100%;
+  min-height: 70vh;
+  border: 0;
+  background: #fff;
+}
