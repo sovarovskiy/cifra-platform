@@ -24,9 +24,10 @@ export function getReferencePdfExportUrl(): string {
   const params = new URLSearchParams({
     format: "pdf",
     gid: REFERENCE_SHEET_GID,
-    portrait: "false",
+    portrait: "true",
     size: "A4",
     scale: "2",
+    fitw: "true",
     gridlines: "true",
     printtitle: "false",
     sheetnames: "false",

@@ -604,7 +604,7 @@ a.sales-breadcrumb:hover {
 }
 
 .reference-table-fit {
-  margin-top: 1rem;
+  margin-top: 0;
   width: 100%;
   min-width: 0;
   max-width: 100%;
