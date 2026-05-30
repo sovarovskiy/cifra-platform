@@ -1,17 +1,17 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
-import { MainMenu } from "@/components/MainMenu";
+import { CallWizard } from "@/components/CallWizard";
 import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
+export default async function OgzScriptPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   return (
     <AppShell isAdmin={user.isAdmin}>
-      <MainMenu />
+      <CallWizard />
     </AppShell>
   );
 }

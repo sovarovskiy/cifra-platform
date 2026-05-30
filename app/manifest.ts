@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Аналитическая платформа Цифра",
     short_name: "Цифра",
     description: "Квалификация лидов по скрипту ОГЗ",
-    start_url: "/login",
+    start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "portrait",

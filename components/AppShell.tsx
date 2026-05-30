@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { KeyRound, LogOut, Phone } from "lucide-react";
+import { KeyRound, LayoutGrid, LogOut } from "lucide-react";
+import { HomeButton } from "@/components/HomeButton";
+import { isMenuHome } from "@/lib/app-menu";
 
 type Props = {
   isAdmin: boolean;
@@ -12,6 +14,7 @@ type Props = {
 export function AppShell({ isAdmin, children }: Props) {
   const pathname = usePathname();
   const router = useRouter();
+  const onMenu = isMenuHome(pathname);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -30,11 +33,11 @@ export function AppShell({ isAdmin, children }: Props) {
           <nav className="flex items-center gap-3" aria-label="Навигация">
             <Link
               href="/"
-              className={`header-icon-btn ${pathname === "/" ? "header-icon-btn--active" : ""}`}
-              aria-label="Звонок"
-              title="Звонок"
+              className={`header-icon-btn ${onMenu ? "header-icon-btn--active" : ""}`}
+              aria-label="Меню"
+              title="Меню"
             >
-              <Phone size={20} strokeWidth={2} />
+              <LayoutGrid size={20} strokeWidth={2} />
             </Link>
             {isAdmin && (
               <Link
@@ -58,7 +61,10 @@ export function AppShell({ isAdmin, children }: Props) {
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-lg px-4 pb-8 pt-4">{children}</main>
+      <main className="mx-auto max-w-lg px-4 pb-8 pt-4">
+        {children}
+        {!onMenu && <HomeButton />}
+      </main>
     </div>
   );
 }
