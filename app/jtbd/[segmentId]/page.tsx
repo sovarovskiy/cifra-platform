@@ -38,7 +38,11 @@ export default async function JtbdSegmentPage({ params }: Props) {
             </p>
           )}
 
-          <JtbdSegmentImages urls={segment.imageUrls} title={segment.title} />
+          <JtbdSegmentImages
+            urls={segment.imageUrls}
+            title={segment.title}
+            pdfUrl={segment.pdfUrl}
+          />
 
           {segment.mainTask && (
             <section className="info-section">
