@@ -30,6 +30,12 @@ export const APP_MENU_ITEMS: AppMenuItem[] = [
     description: "Примеры реализованных проектов",
     href: "/our-objects",
   },
+  {
+    id: "reference",
+    title: "Референс",
+    description: "Справочник ОГЗ (м²) из Google Таблицы",
+    href: "/reference",
+  },
 ];
 
 export function isMenuHome(pathname: string): boolean {
@@ -50,4 +56,8 @@ export function isJtbd(pathname: string): boolean {
 
 export function isOurObjects(pathname: string): boolean {
   return pathname.startsWith("/our-objects");
+}
+
+export function isReference(pathname: string): boolean {
+  return pathname.startsWith("/reference");
 }

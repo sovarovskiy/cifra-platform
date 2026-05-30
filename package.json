@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@upstash/redis": "^1.34.3",
+    "googleapis": "^144.0.0",
     "lucide-react": "^0.468.0",
     "nanoid": "^5.0.9",
     "next": "^15.1.0",

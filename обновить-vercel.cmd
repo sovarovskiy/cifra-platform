@@ -15,9 +15,10 @@ if errorlevel 1 (
 )
 
 git add -A
+git reset HEAD .env.local 2>nul
 git diff --cached --quiet
 if errorlevel 1 (
-  git commit -m "Исправлены кнопки мастера: btn-wizard, скругление, Назад"
+  git commit -m "Обновление платформы Цифра"
   if errorlevel 1 (
     echo ОШИБКА: коммит не создан
     pause
