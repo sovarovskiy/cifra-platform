@@ -10,7 +10,16 @@ export default async function HomePage() {
 
   return (
     <AppShell isAdmin={user.isAdmin}>
-      <div className="min-h-[calc(100dvh-5.5rem)]" aria-label="Главная" />
+      <div className="flex min-h-[calc(100dvh-5.5rem)] flex-col">
+        <p className="text-step-label">Главная</p>
+
+        <article className="content-card info-article mt-4">
+          <p className="text-base leading-relaxed text-ink">
+            Страница находится в разработке и пока не активна, но вы уже можете
+            пользоваться кнопкой меню
+          </p>
+        </article>
+      </div>
     </AppShell>
   );
 }

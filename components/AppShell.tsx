@@ -64,7 +64,7 @@ export function AppShell({ isAdmin, children }: Props) {
       </header>
       <main className="mx-auto max-w-lg min-w-0 px-4 pb-8 pt-4">
         {children}
-        {!onAppHome && <HomeButton />}
+        {!onAppHome && !onMenu && <HomeButton />}
       </main>
     </div>
   );

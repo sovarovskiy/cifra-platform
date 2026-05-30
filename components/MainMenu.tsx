@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { APP_MENU_ITEMS } from "@/lib/app-menu";
+import { HomeButton } from "@/components/HomeButton";
 
 export function MainMenu() {
   return (
@@ -19,6 +20,10 @@ export function MainMenu() {
           </Link>
         ))}
       </nav>
+
+      <div className="mt-auto pt-6">
+        <HomeButton />
+      </div>
     </div>
   );
 }
