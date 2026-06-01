@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { AdminEmails } from "@/components/AdminEmails";
 import { AdminStats } from "@/components/AdminStats";
+import { AdminTestStats } from "@/components/AdminTestStats";
 
-type Tab = "access" | "stats";
+type Tab = "access" | "stats" | "tests";
 
 export function AdminPanel() {
   const [tab, setTab] = useState<Tab>("access");
@@ -30,11 +31,26 @@ export function AdminPanel() {
           className={`admin-tab ${tab === "stats" ? "admin-tab--active" : ""}`}
           onClick={() => setTab("stats")}
         >
-          Статистика
+          Звонки
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "tests"}
+          className={`admin-tab ${tab === "tests" ? "admin-tab--active" : ""}`}
+          onClick={() => setTab("tests")}
+        >
+          Тесты
         </button>
       </div>
 
-      {tab === "access" ? <AdminEmails /> : <AdminStats />}
+      {tab === "access" ? (
+        <AdminEmails />
+      ) : tab === "stats" ? (
+        <AdminStats />
+      ) : (
+        <AdminTestStats />
+      )}
     </div>
   );
 }

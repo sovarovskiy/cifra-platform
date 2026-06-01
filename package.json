@@ -10,7 +10,8 @@
     "icons": "node scripts/generate-icons.mjs",
     "jtbd-pdfs": "node scripts/import-jtbd-pdfs.mjs",
     "our-objects": "node scripts/import-our-objects.mjs",
-    "home-ogz": "node scripts/import-home-ogz.mjs"
+    "home-ogz": "node scripts/import-home-ogz.mjs",
+    "test-questions": "node scripts/write-test-questions-json.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.34.3",
@@ -22,6 +23,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "tsx": "^4.19.2",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

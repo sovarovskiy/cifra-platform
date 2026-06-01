@@ -41,7 +41,7 @@ git reset HEAD "cifra-platform-*.json" 2>nul
 
 git diff --cached --quiet
 if errorlevel 1 (
-  git commit -m "Главная, меню, статистика админа, референс, PWA"
+  git commit -m "Тест знаний: 20 случайных из банка, порог 16/20, админ-статистика"
   if errorlevel 1 goto :fail
   echo [OK] Коммит создан
 ) else (

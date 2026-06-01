@@ -1,0 +1,12 @@
+---
+description: Тест знаний — план по фразе пользователя
+alwaysApply: true
+---
+
+# Тест (реализовано)
+
+Меню **«Тест»** → `/test`. Каждая попытка: **20 случайных из банка ~200** (`scripts/generate-test-questions.mjs`). Порог **сдал ≥16/20** — в итоге и в админке. Попытки: `lib/test-stats.ts`, Redis на prod.
+
+Экспорт JSON для правок: `npm run test-questions` / `импорт-тест-вопросы.cmd`.
+
+Доработки — `docs/test-plan.md`.
