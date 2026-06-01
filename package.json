@@ -11,7 +11,8 @@
     "jtbd-pdfs": "node scripts/import-jtbd-pdfs.mjs",
     "our-objects": "node scripts/import-our-objects.mjs",
     "home-ogz": "node scripts/import-home-ogz.mjs",
-    "test-questions": "node scripts/write-test-questions-json.mjs"
+    "test-questions": "node scripts/sync-test-csv.mjs && npx --yes tsx scripts/export-test-bank.ts",
+    "sync-test-csv": "node scripts/sync-test-csv.mjs"
   },
   "dependencies": {
     "@upstash/redis": "^1.34.3",

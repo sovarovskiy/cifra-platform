@@ -112,10 +112,6 @@ export function TestQuiz() {
     return (
       <div className="content-card space-y-4">
         <h2 className="text-brand-title text-lg">Тест знаний</h2>
-        <p className="text-sm text-slate-700 leading-relaxed">
-          20 случайных вопросов из банка (~200) по скрипту ОГЗ, JTBD, воронкам и
-          модели продаж. Порог «сдал» — не менее 16 из 20 (80%).
-        </p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button
           type="button"
