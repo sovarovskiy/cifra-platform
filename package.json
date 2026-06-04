@@ -11,6 +11,7 @@
     "jtbd-pdfs": "node scripts/import-jtbd-pdfs.mjs",
     "our-objects": "node scripts/import-our-objects.mjs",
     "home-ogz": "node scripts/import-home-ogz.mjs",
+    "sp551-parkings": "node scripts/import-sp551-parkings.mjs",
     "test-questions": "node scripts/sync-test-csv.mjs && npx --yes tsx scripts/export-test-bank.ts",
     "sync-test-csv": "node scripts/sync-test-csv.mjs"
   },

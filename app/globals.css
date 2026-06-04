@@ -543,6 +543,30 @@ a.sales-breadcrumb:hover {
   color: var(--color-primary);
 }
 
+.info-bullet-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.info-bullet-list li + li {
+  margin-top: 0.35rem;
+}
+
+.article-video {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f2a2e;
+}
+
+.article-video-player {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  vertical-align: middle;
+}
+
 .info-paragraph {
   margin-top: 0.5rem;
   font-size: 15px;

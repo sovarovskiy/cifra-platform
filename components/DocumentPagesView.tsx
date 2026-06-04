@@ -2,6 +2,7 @@ type Props = {
   urls: string[];
   title: string;
   pdfUrl?: string;
+  videoUrl?: string;
   importHint?: string;
 };
 
@@ -9,6 +10,7 @@ export function DocumentPagesView({
   urls,
   title,
   pdfUrl,
+  videoUrl,
   importHint = "импорт-jtbd-pdf.cmd",
 }: Props) {
   return (
@@ -39,6 +41,20 @@ export function DocumentPagesView({
             <span className="menu-item-title">Скачать PDF</span>
           </span>
         </a>
+      )}
+
+      {videoUrl && (
+        <div className="article-video mt-4">
+          <video
+            className="article-video-player"
+            controls
+            playsInline
+            preload="metadata"
+            src={videoUrl}
+          >
+            Ваш браузер не поддерживает воспроизведение видео.
+          </video>
+        </div>
       )}
     </div>
   );

@@ -73,8 +73,18 @@ export const POZHARKA_MENU_ITEMS: AppMenuItem[] = [
   {
     id: "obuchenie",
     title: "Обучение",
-    description: "Материалы и тесты по пожарной безопасности",
+    description: "Статьи и материалы по пожарной безопасности",
     href: "/pozharka/obuchenie",
+  },
+];
+
+/** Материалы внутри «Обучение» */
+export const OBUCHENIE_MENU_ITEMS: AppMenuItem[] = [
+  {
+    id: "sp551-parkings",
+    title: "Подземные паркинги и электромобили что меняет СП 551",
+    description: "СП 551.1311500.2026: требования к стоянкам с электромобилями",
+    href: "/pozharka/obuchenie/sp-551-parkings",
   },
 ];
 
