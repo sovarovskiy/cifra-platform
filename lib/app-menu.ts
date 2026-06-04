@@ -1,3 +1,5 @@
+import { POZHARKA_ARTICLE_CONFIGS } from "./pozharka-article-registry";
+
 export type AppMenuItem = {
   id: string;
   title: string;
@@ -79,14 +81,14 @@ export const POZHARKA_MENU_ITEMS: AppMenuItem[] = [
 ];
 
 /** Материалы внутри «Обучение» */
-export const OBUCHENIE_MENU_ITEMS: AppMenuItem[] = [
-  {
-    id: "sp551-parkings",
-    title: "Подземные паркинги и электромобили что меняет СП 551",
-    description: "СП 551.1311500.2026: требования к стоянкам с электромобилями",
-    href: "/pozharka/obuchenie/sp-551-parkings",
-  },
-];
+export const OBUCHENIE_MENU_ITEMS: AppMenuItem[] = Object.values(
+  POZHARKA_ARTICLE_CONFIGS
+).map((article) => ({
+  id: article.slug,
+  title: article.menuTitle,
+  description: article.menuDescription,
+  href: `/pozharka/obuchenie/${article.slug}`,
+}));
 
 /** @deprecated используйте OGZ_MENU_ITEMS */
 export const APP_MENU_ITEMS = OGZ_MENU_ITEMS;

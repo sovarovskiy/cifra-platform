@@ -1,25 +1,34 @@
-import {
-  SP551_PARKINGS_ARTICLE_BLOCKS,
-  SP551_PARKINGS_RELATED_TOPICS,
-} from "@/lib/pozharka-sp551-parkings-article";
-import type { Sp551ParkingsMedia } from "@/lib/pozharka-sp551-parkings";
+import type {
+  ArticleBlock,
+  PozharkaArticleMedia,
+} from "@/lib/pozharka-article-types";
 import { DocumentPagesView } from "@/components/DocumentPagesView";
 
 type Props = {
-  media: Sp551ParkingsMedia;
+  title: string;
+  blocks: ArticleBlock[];
+  relatedTopics?: string[];
+  media: PozharkaArticleMedia;
+  imagesTitle: string;
+  importHint: string;
 };
 
-export function PozharkaArticleView({ media }: Props) {
+export function PozharkaArticleView({
+  title,
+  blocks,
+  relatedTopics = [],
+  media,
+  imagesTitle,
+  importHint,
+}: Props) {
   const videoUrl = media.videoUrl?.trim() || undefined;
 
   return (
     <article className="content-card info-article mt-4 flex-1">
-      <h1 className="text-brand-title text-lg leading-snug">
-        Подземные паркинги и электромобили: что меняет СП 551
-      </h1>
+      <h1 className="text-brand-title text-lg leading-snug">{title}</h1>
 
       <div className="info-article-body mt-4 space-y-4 text-[15px] leading-relaxed text-[#1a1a1a]">
-        {SP551_PARKINGS_ARTICLE_BLOCKS.map((block, index) => {
+        {blocks.map((block, index) => {
           if (block.type === "p") {
             return <p key={index}>{block.text}</p>;
           }
@@ -40,11 +49,11 @@ export function PozharkaArticleView({ media }: Props) {
         })}
       </div>
 
-      {SP551_PARKINGS_RELATED_TOPICS.length > 0 && (
+      {relatedTopics.length > 0 && (
         <div className="info-section mt-6">
           <p className="info-section-title">Смежные материалы</p>
           <ul className="info-bullet-list mt-2">
-            {SP551_PARKINGS_RELATED_TOPICS.map((topic) => (
+            {relatedTopics.map((topic) => (
               <li key={topic}>{topic}</li>
             ))}
           </ul>
@@ -53,9 +62,9 @@ export function PozharkaArticleView({ media }: Props) {
 
       <DocumentPagesView
         urls={media.imageUrls}
-        title="СП 551 — паркинги и электромобили"
+        title={imagesTitle}
         pdfUrl={media.pdfUrl}
-        importHint="импорт-sp551-паркинги.cmd"
+        importHint={importHint}
         videoUrl={videoUrl}
       />
     </article>

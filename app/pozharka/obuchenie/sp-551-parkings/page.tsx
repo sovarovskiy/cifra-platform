@@ -1,9 +1,10 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { PozharkaArticleView } from "@/components/PozharkaArticleView";
 import { getCurrentUser } from "@/lib/auth";
-import { getSp551ParkingsMedia } from "@/lib/pozharka-sp551-parkings";
+import { getPozharkaArticleConfig } from "@/lib/pozharka-article-registry";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,8 @@ export default async function Sp551ParkingsPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const media = getSp551ParkingsMedia();
+  const config = getPozharkaArticleConfig("sp-551-parkings");
+  if (!config) notFound();
 
   return (
     <AppShell isAdmin={user.isAdmin}>
@@ -20,7 +22,14 @@ export default async function Sp551ParkingsPage() {
           ← Обучение
         </Link>
 
-        <PozharkaArticleView media={media} />
+        <PozharkaArticleView
+          title={config.pageTitle}
+          blocks={config.content.blocks}
+          relatedTopics={config.content.relatedTopics}
+          media={config.media}
+          imagesTitle={config.imagesTitle}
+          importHint={config.importHint}
+        />
       </div>
     </AppShell>
   );
