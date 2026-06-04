@@ -50,7 +50,7 @@ export const POZHARKA_ARTICLE_CONFIGS: Record<string, PozharkaArticleConfig> = {
     pageTitle:
       "Как обновлять пожарные документы в организации после ремонта?",
     imagesTitle: "Пожарные документы после ремонта",
-    importHint: "",
+    importHint: "импорт-пожарные-документы-после-ремонта.cmd",
     content: fireDocsArticle as PozharkaArticleContent,
     media: fireDocsMedia,
   },

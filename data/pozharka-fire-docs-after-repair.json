@@ -1,5 +1,15 @@
 {
-  "pdfUrl": "",
-  "videoUrl": null,
-  "imageUrls": []
+  "pdfUrl": "/pozharka/fire-docs-after-repair/fire-docs-after-repair.pdf",
+  "videoUrl": "/pozharka/fire-docs-after-repair/video.mp4",
+  "imageUrls": [
+    "/pozharka/fire-docs-after-repair/images/1.png",
+    "/pozharka/fire-docs-after-repair/images/2.png",
+    "/pozharka/fire-docs-after-repair/images/3.png",
+    "/pozharka/fire-docs-after-repair/images/4.png",
+    "/pozharka/fire-docs-after-repair/images/5.png",
+    "/pozharka/fire-docs-after-repair/images/6.png",
+    "/pozharka/fire-docs-after-repair/images/7.png",
+    "/pozharka/fire-docs-after-repair/images/8.png",
+    "/pozharka/fire-docs-after-repair/images/9.png"
+  ]
 }

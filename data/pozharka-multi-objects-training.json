@@ -1,15 +1,5 @@
 {
   "pdfUrl": "/pozharka/multi-objects-training/multi-objects-training.pdf",
   "videoUrl": "/pozharka/multi-objects-training/video.mp4",
-  "imageUrls": [
-    "/pozharka/multi-objects-training/images/1.png",
-    "/pozharka/multi-objects-training/images/2.png",
-    "/pozharka/multi-objects-training/images/3.png",
-    "/pozharka/multi-objects-training/images/4.png",
-    "/pozharka/multi-objects-training/images/5.png",
-    "/pozharka/multi-objects-training/images/6.png",
-    "/pozharka/multi-objects-training/images/7.png",
-    "/pozharka/multi-objects-training/images/8.png",
-    "/pozharka/multi-objects-training/images/9.png"
-  ]
+  "imageUrls": []
 }
