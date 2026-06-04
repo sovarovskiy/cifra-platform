@@ -15,12 +15,12 @@ export function DocumentPagesView({
 }: Props) {
   return (
     <div className="mt-4">
-      {urls.length === 0 ? (
+      {urls.length === 0 && importHint ? (
         <p className="info-note">
           Картинки ещё не загружены. Запустите на компьютере:{" "}
           <code className="text-sm">{importHint}</code>
         </p>
-      ) : (
+      ) : urls.length === 0 ? null : (
         <div className="jtbd-images">
           {urls.map((url, index) => (
             <img

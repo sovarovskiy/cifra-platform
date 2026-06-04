@@ -12,7 +12,7 @@
     "our-objects": "node scripts/import-our-objects.mjs",
     "home-ogz": "node scripts/import-home-ogz.mjs",
     "sp551-parkings": "node scripts/import-pozharka-article.mjs sp551-parkings \"Подземные паркинги и электромобили что меняет СП 551\" bazadata",
-    "fire-docs-after-repair": "node scripts/import-pozharka-article.mjs fire-docs-after-repair \"Как обновлять пожарные документы в организации после ремонта\" desktop",
+    "multi-objects-training": "node scripts/import-pozharka-article.mjs multi-objects-training \"Как обновлять пожарные документы в организации после ремонта\" desktop",
     "test-questions": "node scripts/sync-test-csv.mjs && npx --yes tsx scripts/export-test-bank.ts",
     "sync-test-csv": "node scripts/sync-test-csv.mjs"
   },

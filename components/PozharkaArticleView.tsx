@@ -22,6 +22,9 @@ export function PozharkaArticleView({
   importHint,
 }: Props) {
   const videoUrl = media.videoUrl?.trim() || undefined;
+  const pdfUrl = media.pdfUrl?.trim() || undefined;
+  const hasMedia =
+    media.imageUrls.length > 0 || Boolean(pdfUrl) || Boolean(videoUrl);
 
   return (
     <article className="content-card info-article mt-4 flex-1">
@@ -60,13 +63,15 @@ export function PozharkaArticleView({
         </div>
       )}
 
-      <DocumentPagesView
-        urls={media.imageUrls}
-        title={imagesTitle}
-        pdfUrl={media.pdfUrl}
-        importHint={importHint}
-        videoUrl={videoUrl}
-      />
+      {hasMedia && (
+        <DocumentPagesView
+          urls={media.imageUrls}
+          title={imagesTitle}
+          pdfUrl={pdfUrl}
+          importHint={importHint}
+          videoUrl={videoUrl}
+        />
+      )}
     </article>
   );
 }

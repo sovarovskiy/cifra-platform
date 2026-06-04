@@ -14,6 +14,7 @@ const rootDir = path.join(__dirname, "..");
 const slug = process.argv[2];
 const baseName = process.argv[3];
 const sourceMode = process.argv[4] ?? "desktop";
+const rewriteArticle = process.argv.includes("--rewrite-article");
 
 if (!slug || !baseName) {
   console.error(
@@ -131,8 +132,6 @@ if (sourceMp4) {
 
 try {
   const imageUrls = await convertPdfToImages(pdfDest, imageDir, publicPrefix);
-  const blocks = await extractArticleBlocks(pdfDest);
-
   const manifest = {
     pdfUrl: `${publicPrefix}/${slug}.pdf`,
     videoUrl,
@@ -140,13 +139,22 @@ try {
   };
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 
-  const article = { blocks, relatedTopics: [] };
-  fs.writeFileSync(articlePath, `${JSON.stringify(article, null, 2)}\n`, "utf8");
-
   console.log("[IMG]", imageUrls.length, "стр.");
-  console.log("[TXT]", blocks.length, "блоков");
   console.log("[OK]", manifestPath);
-  console.log("[OK]", articlePath);
+
+  if (rewriteArticle) {
+    const blocks = await extractArticleBlocks(pdfDest);
+    const article = { blocks, relatedTopics: [] };
+    fs.writeFileSync(articlePath, `${JSON.stringify(article, null, 2)}\n`, "utf8");
+    console.log("[TXT]", blocks.length, "блоков →", articlePath);
+  } else if (fs.existsSync(articlePath)) {
+    console.log("[skip] текст статьи не меняем:", articlePath);
+  } else {
+    const blocks = await extractArticleBlocks(pdfDest);
+    const article = { blocks, relatedTopics: [] };
+    fs.writeFileSync(articlePath, `${JSON.stringify(article, null, 2)}\n`, "utf8");
+    console.log("[TXT]", blocks.length, "блоков (новый файл)");
+  }
 } catch (err) {
   console.error("[ERR]", err instanceof Error ? err.message : err);
   process.exit(1);

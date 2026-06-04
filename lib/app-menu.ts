@@ -1,4 +1,7 @@
-import { POZHARKA_ARTICLE_CONFIGS } from "./pozharka-article-registry";
+import {
+  OBUCHENIE_ARTICLE_SLUG_ORDER,
+  POZHARKA_ARTICLE_CONFIGS,
+} from "./pozharka-article-registry";
 
 export type AppMenuItem = {
   id: string;
@@ -81,14 +84,17 @@ export const POZHARKA_MENU_ITEMS: AppMenuItem[] = [
 ];
 
 /** Материалы внутри «Обучение» */
-export const OBUCHENIE_MENU_ITEMS: AppMenuItem[] = Object.values(
-  POZHARKA_ARTICLE_CONFIGS
-).map((article) => ({
-  id: article.slug,
-  title: article.menuTitle,
-  description: article.menuDescription,
-  href: `/pozharka/obuchenie/${article.slug}`,
-}));
+export const OBUCHENIE_MENU_ITEMS: AppMenuItem[] = OBUCHENIE_ARTICLE_SLUG_ORDER.map(
+  (slug) => {
+    const article = POZHARKA_ARTICLE_CONFIGS[slug]!;
+    return {
+      id: article.slug,
+      title: article.menuTitle,
+      description: article.menuDescription,
+      href: `/pozharka/obuchenie/${article.slug}`,
+    };
+  }
+);
 
 /** @deprecated используйте OGZ_MENU_ITEMS */
 export const APP_MENU_ITEMS = OGZ_MENU_ITEMS;
