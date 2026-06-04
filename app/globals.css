@@ -463,6 +463,15 @@ a.menu-item--compact {
   justify-content: center;
 }
 
+a.menu-item--main {
+  min-height: 64px;
+  padding: 16px 18px;
+}
+
+a.menu-item--main .menu-item-title {
+  font-size: 18px;
+}
+
 .menu-item-text {
   display: flex;
   flex-direction: column;

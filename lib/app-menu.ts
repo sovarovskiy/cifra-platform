@@ -5,7 +5,31 @@ export type AppMenuItem = {
   href: string;
 };
 
-export const APP_MENU_ITEMS: AppMenuItem[] = [
+export type AppMenuSection = {
+  id: string;
+  title: string;
+  description: string;
+  href: string;
+};
+
+/** Две главные кнопки меню */
+export const MAIN_MENU_SECTIONS: AppMenuSection[] = [
+  {
+    id: "ogz",
+    title: "ОГЗ",
+    description: "Скрипт, тест, справочник и материалы по огнезащите",
+    href: "/menu/ogz",
+  },
+  {
+    id: "pozharka",
+    title: "Пожарка",
+    description: "Обучение и разделы по пожарной безопасности",
+    href: "/menu/pozharka",
+  },
+];
+
+/** Разделы внутри «ОГЗ» (бывшее плоское меню) */
+export const OGZ_MENU_ITEMS: AppMenuItem[] = [
   {
     id: "ogz-script",
     title: "Скрипт квал ОГЗ",
@@ -44,12 +68,25 @@ export const APP_MENU_ITEMS: AppMenuItem[] = [
   },
 ];
 
+/** Разделы внутри «Пожарка» */
+export const POZHARKA_MENU_ITEMS: AppMenuItem[] = [
+  {
+    id: "obuchenie",
+    title: "Обучение",
+    description: "Материалы и тесты по пожарной безопасности",
+    href: "/pozharka/obuchenie",
+  },
+];
+
+/** @deprecated используйте OGZ_MENU_ITEMS */
+export const APP_MENU_ITEMS = OGZ_MENU_ITEMS;
+
 export function isAppHome(pathname: string): boolean {
   return pathname === "/";
 }
 
 export function isMenuPage(pathname: string): boolean {
-  return pathname === "/menu";
+  return pathname === "/menu" || pathname.startsWith("/menu/");
 }
 
 /** @deprecated use isMenuPage */
@@ -79,4 +116,8 @@ export function isReference(pathname: string): boolean {
 
 export function isTest(pathname: string): boolean {
   return pathname.startsWith("/test");
+}
+
+export function isPozharka(pathname: string): boolean {
+  return pathname.startsWith("/pozharka");
 }
