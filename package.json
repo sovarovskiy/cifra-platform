@@ -14,6 +14,8 @@
     "sp551-parkings": "node scripts/import-pozharka-article.mjs sp551-parkings \"Подземные паркинги и электромобили что меняет СП 551\" bazadata",
     "fire-docs-after-repair": "node scripts/import-pozharka-article.mjs fire-docs-after-repair \"Как обновлять пожарные документы в организации после ремонта\" bazadata",
     "multi-objects-training": "node scripts/import-pozharka-article.mjs multi-objects-training \"Как выстроить систему обучения для нескольких объектов\" bazadata",
+    "fire-services-bundle": "node scripts/import-pozharka-article.mjs fire-services-bundle \"Как собрать несколько услуг пожарной безопасности в один проект\" desktop",
+    "evac-plan-standard": "node scripts/import-pozharka-article.mjs evac-plan-standard \"Почему одного стандартного плана эвакуации часто недостаточно\" desktop",
     "test-questions": "node scripts/sync-test-csv.mjs && npx --yes tsx scripts/export-test-bank.ts",
     "sync-test-csv": "node scripts/sync-test-csv.mjs"
   },

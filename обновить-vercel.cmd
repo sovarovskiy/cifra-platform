@@ -22,17 +22,33 @@ if errorlevel 1 (
 )
 
 echo.
-echo  === 2. Сборка (проверка перед push) ===
+echo  === 2. Импорт медиа для новых статей Обучения ===
 echo.
 
 call npm install
 if errorlevel 1 goto :fail
 
+node scripts/import-pozharka-article.mjs fire-services-bundle "Как собрать несколько услуг пожарной безопасности в один проект" desktop
+if errorlevel 1 (
+  echo ОШИБКА импорта fire-services-bundle. Положите на рабочий стол PDF и MP4.
+  goto :fail
+)
+
+node scripts/import-pozharka-article.mjs evac-plan-standard "Почему одного стандартного плана эвакуации часто недостаточно" desktop
+if errorlevel 1 (
+  echo ОШИБКА импорта evac-plan-standard. Положите на рабочий стол PDF и MP4.
+  goto :fail
+)
+
+echo.
+echo  === 3. Сборка (проверка перед push) ===
+echo.
+
 call npm run build
 if errorlevel 1 goto :fail
 
 echo.
-echo  === 3. Коммит и push на GitHub ===
+echo  === 4. Коммит и push на GitHub ===
 echo.
 
 git add -A
@@ -41,7 +57,7 @@ git reset HEAD "cifra-platform-*.json" 2>nul
 
 git diff --cached --quiet
 if errorlevel 1 (
-  git commit -m "Тест знаний: 20 случайных из банка, порог 16/20, админ-статистика"
+  git commit -m "Пожарка / Обучение: две новые статьи (услуги ПБ в проект, план эвакуации)"
   if errorlevel 1 goto :fail
   echo [OK] Коммит создан
 ) else (

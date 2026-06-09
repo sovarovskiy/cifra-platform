@@ -6,12 +6,18 @@ import fireDocsArticle from "@/data/pozharka-fire-docs-after-repair-article.json
 import fireDocsMedia from "@/data/pozharka-fire-docs-after-repair.json";
 import multiObjectsArticle from "@/data/pozharka-multi-objects-training-article.json";
 import multiObjectsMedia from "@/data/pozharka-multi-objects-training.json";
+import fireServicesBundleArticle from "@/data/pozharka-fire-services-bundle-article.json";
+import fireServicesBundleMedia from "@/data/pozharka-fire-services-bundle.json";
+import evacPlanStandardArticle from "@/data/pozharka-evac-plan-standard-article.json";
+import evacPlanStandardMedia from "@/data/pozharka-evac-plan-standard.json";
 
 /** Порядок кнопок в разделе «Обучение» */
 export const OBUCHENIE_ARTICLE_SLUG_ORDER = [
   "sp-551-parkings",
   "fire-docs-after-repair",
   "multi-objects-training",
+  "fire-services-bundle",
+  "evac-plan-standard",
 ] as const;
 
 export type PozharkaArticleConfig = {
@@ -64,6 +70,32 @@ export const POZHARKA_ARTICLE_CONFIGS: Record<string, PozharkaArticleConfig> = {
     importHint: "импорт-обучение-несколько-объектов.cmd",
     content: multiObjectsArticle as PozharkaArticleContent,
     media: multiObjectsMedia,
+  },
+  "fire-services-bundle": {
+    slug: "fire-services-bundle",
+    menuTitle:
+      "Как собрать несколько услуг пожарной безопасности в один проект",
+    menuDescription:
+      "Единый маршрут работ по объекту без дублирования выездов и документов",
+    pageTitle:
+      "Как собрать несколько услуг пожарной безопасности в один проект",
+    imagesTitle: "Услуги ПБ в один проект",
+    importHint: "импорт-услуги-пб-в-один-проект.cmd",
+    content: fireServicesBundleArticle as PozharkaArticleContent,
+    media: fireServicesBundleMedia,
+  },
+  "evac-plan-standard": {
+    slug: "evac-plan-standard",
+    menuTitle:
+      "Почему одного стандартного плана эвакуации часто недостаточно?",
+    menuDescription:
+      "Когда схема по стандарту не помогает ориентироваться на объекте",
+    pageTitle:
+      "Почему одного стандартного плана эвакуации часто недостаточно?",
+    imagesTitle: "Стандартный план эвакуации",
+    importHint: "импорт-план-эвакуации-стандарт.cmd",
+    content: evacPlanStandardArticle as PozharkaArticleContent,
+    media: evacPlanStandardMedia,
   },
 };
 
