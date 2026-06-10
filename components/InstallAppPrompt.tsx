@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { isIos, isStandalonePwa } from "@/lib/pwa";
 
 type Props = {
@@ -57,19 +58,24 @@ export function InstallAppPrompt({
       }
     >
       <div className={isWelcome ? "bg-brand p-6 text-white" : "p-1"}>
-        <p className={isWelcome ? "text-eyebrow text-white/80" : "text-eyebrow"}>
-          PWA
-        </p>
-        <h2
-          className={
-            isWelcome ? "mt-1 text-xl font-bold text-white" : "text-brand-title mt-1"
-          }
-        >
-          Аналитическая платформа «Цифра»
-        </h2>
+        <div className="flex items-start gap-4">
+          <BrandLogo size={isWelcome ? 64 : 48} className="shrink-0 rounded-[14px] shadow-icon" />
+          <div className="min-w-0">
+            <p className={isWelcome ? "text-eyebrow text-white/80" : "text-eyebrow"}>
+              PWA
+            </p>
+            <h2
+              className={
+                isWelcome ? "mt-1 text-xl font-bold text-white" : "text-brand-title mt-1"
+              }
+            >
+              Аналитическая платформа «Цифра»
+            </h2>
+          </div>
+        </div>
         <p
           className={
-            isWelcome ? "mt-2 text-sm text-white/90" : "text-hint mt-2"
+            isWelcome ? "mt-3 text-sm text-white/90" : "text-hint mt-2"
           }
         >
           Установите приложение на главный экран — так удобнее на звонках.

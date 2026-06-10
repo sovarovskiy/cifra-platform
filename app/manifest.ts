@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { ICON_BG, THEME_COLOR } from "@/lib/brand-icon";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -9,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#1A535C",
-    theme_color: "#1A535C",
+    background_color: ICON_BG,
+    theme_color: THEME_COLOR,
     lang: "ru",
     icons: [
       {
@@ -29,6 +30,12 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/apple-icon",
         sizes: "180x180",
         type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/brand-logo.svg",
+        sizes: "any",
+        type: "image/svg+xml",
         purpose: "any",
       },
     ],

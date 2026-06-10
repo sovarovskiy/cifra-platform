@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { getDeviceId } from "@/lib/device-id";
 
 export function LoginForm() {
@@ -70,8 +71,13 @@ export function LoginForm() {
   return (
     <div className="mx-auto w-full max-w-lg">
       <div className="content-card p-6">
-        <p className="text-eyebrow">Аналитическая платформа</p>
-        <h1 className="text-brand-title mt-1">Цифра</h1>
+        <div className="flex items-center gap-4">
+          <BrandLogo size={56} className="shrink-0 rounded-[14px] shadow-icon" />
+          <div>
+            <p className="text-eyebrow">Аналитическая платформа</p>
+            <h1 className="text-brand-title mt-1">Цифра</h1>
+          </div>
+        </div>
         <p className="text-hint mt-2">Вход по корпоративной почте из списка разрешённых</p>
 
         {step === "email" ? (

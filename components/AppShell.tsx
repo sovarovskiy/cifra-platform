@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { KeyRound, LayoutGrid, LogOut } from "lucide-react";
+import { BrandLogo } from "@/components/BrandLogo";
 import { HomeButton } from "@/components/HomeButton";
 import { isAppHome, isMenuPage } from "@/lib/app-menu";
 
@@ -27,9 +28,12 @@ export function AppShell({ isAdmin, children }: Props) {
     <div className="min-h-screen bg-canvas">
       <header className="app-header">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
-          <div>
-            <p className="text-eyebrow">Аналитическая платформа</p>
-            <h1 className="text-brand-title">Цифра</h1>
+          <div className="flex min-w-0 items-center gap-3">
+            <BrandLogo size={40} className="shrink-0 rounded-[10px] shadow-icon" />
+            <div className="min-w-0">
+              <p className="text-eyebrow">Аналитическая платформа</p>
+              <h1 className="text-brand-title">Цифра</h1>
+            </div>
           </div>
           <nav className="flex items-center gap-3" aria-label="Навигация">
             <Link

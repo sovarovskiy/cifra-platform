@@ -7,7 +7,8 @@ function isCacheableAsset(url) {
     url.pathname.startsWith("/_next/static/") ||
     url.pathname === "/favicon.ico" ||
     url.pathname.startsWith("/icon") ||
-    url.pathname.startsWith("/apple-icon")
+    url.pathname.startsWith("/apple-icon") ||
+    url.pathname === "/brand-logo.svg"
   );
 }
 

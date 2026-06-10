@@ -2,23 +2,43 @@
  * Импорт статьи «Пожарка / Обучение»: PDF → PNG + текст, MP4, манифесты.
  *
  * node scripts/import-pozharka-article.mjs <slug> "<имя файла без расширения>" [desktop|bazadata]
+ *   [--pdf="C:\path\file.pdf"] [--mp4="C:\path\file.mp4"] [--source-dir="C:\folder"]
+ *   [--rewrite-article] [--skip-if-imported]
  */
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { pdf } from "pdf-to-img";
+import {
+  findSourceFile,
+  formatSearchReport,
+} from "./pozharka-source-paths.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.join(__dirname, "..");
 
-const slug = process.argv[2];
-const baseName = process.argv[3];
-const sourceMode = process.argv[4] ?? "desktop";
-const rewriteArticle = process.argv.includes("--rewrite-article");
+const args = process.argv.slice(2);
+const flags = args.filter((a) => a.startsWith("--"));
+const positional = args.filter((a) => !a.startsWith("--"));
+
+const slug = positional[0];
+const baseName = positional[1];
+const sourceMode = positional[2] ?? "desktop";
+const rewriteArticle = flags.includes("--rewrite-article");
+const skipIfImported = flags.includes("--skip-if-imported");
+
+function flagValue(name) {
+  const hit = flags.find((f) => f.startsWith(`${name}=`));
+  return hit ? hit.slice(name.length + 1).replace(/^"|"$/g, "") : null;
+}
+
+const pdfOverride = flagValue("--pdf");
+const mp4Override = flagValue("--mp4");
+const sourceDir = flagValue("--source-dir");
 
 if (!slug || !baseName) {
   console.error(
-    'Usage: node scripts/import-pozharka-article.mjs <slug> "<base name>" [desktop|bazadata]'
+    'Usage: node scripts/import-pozharka-article.mjs <slug> "<base name>" [desktop|bazadata] [--pdf=...] [--mp4=...] [--source-dir=...]'
   );
   process.exit(1);
 }
@@ -26,22 +46,17 @@ if (!slug || !baseName) {
 const PDF_NAME = `${baseName}.pdf`;
 const MP4_NAME = `${baseName}.mp4`;
 
-const DESKTOP_ROOTS = [
-  path.join(process.env.USERPROFILE ?? "", "OneDrive", "Рабочий стол"),
-  path.join(process.env.USERPROFILE ?? "", "Desktop"),
-  path.join(process.env.USERPROFILE ?? "", "OneDrive", "Desktop"),
-  "C:\\Users\\Windows\\OneDrive\\Рабочий стол",
-];
+const assetDir = path.join(rootDir, "public", "pozharka", slug);
+const imageDir = path.join(assetDir, "images");
+const pdfDest = path.join(assetDir, `${slug}.pdf`);
+const videoDest = path.join(assetDir, "video.mp4");
+const manifestPath = path.join(rootDir, "data", `pozharka-${slug}.json`);
+const articlePath = path.join(rootDir, "data", `pozharka-${slug}-article.json`);
+const publicPrefix = `/pozharka/${slug}`;
 
-const BAZADATA_ROOTS = DESKTOP_ROOTS.map((r) => path.join(r, "База данных"));
-
-function findFile(name) {
-  const roots = sourceMode === "bazadata" ? BAZADATA_ROOTS : DESKTOP_ROOTS;
-  for (const dir of roots) {
-    const full = path.join(dir, name);
-    if (fs.existsSync(full)) return full;
-  }
-  return null;
+function isAlreadyImported() {
+  const firstImage = path.join(imageDir, "1.png");
+  return fs.existsSync(pdfDest) && fs.existsSync(firstImage);
 }
 
 function clearDir(dir) {
@@ -99,22 +114,25 @@ async function extractArticleBlocks(pdfPath) {
   }
 }
 
-const assetDir = path.join(rootDir, "public", "pozharka", slug);
-const imageDir = path.join(assetDir, "images");
-const pdfDest = path.join(assetDir, `${slug}.pdf`);
-const videoDest = path.join(assetDir, "video.mp4");
-const manifestPath = path.join(rootDir, "data", `pozharka-${slug}.json`);
-const articlePath = path.join(rootDir, "data", `pozharka-${slug}-article.json`);
-const publicPrefix = `/pozharka/${slug}`;
-
 fs.mkdirSync(assetDir, { recursive: true });
 
-const sourcePdf = findFile(PDF_NAME);
-const sourceMp4 = findFile(MP4_NAME);
+if (skipIfImported && isAlreadyImported()) {
+  console.log("[skip] уже импортировано:", assetDir);
+  process.exit(0);
+}
+
+const sourcePdf =
+  pdfOverride && fs.existsSync(pdfOverride)
+    ? pdfOverride
+    : findSourceFile(baseName, ".pdf", sourceMode, slug, sourceDir);
+
+const sourceMp4 =
+  mp4Override && fs.existsSync(mp4Override)
+    ? mp4Override
+    : findSourceFile(baseName, ".mp4", sourceMode, slug, sourceDir);
 
 if (!sourcePdf) {
-  console.error("PDF не найден:", PDF_NAME);
-  console.error("Режим:", sourceMode);
+  console.error(formatSearchReport(baseName, ".pdf", sourceMode, slug, sourceDir));
   process.exit(1);
 }
 

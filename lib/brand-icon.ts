@@ -1,5 +1,8 @@
-/** Цвета иконки PWA — как в интерфейсе приложения */
-export const ICON_GRADIENT =
-  "linear-gradient(180deg, #2a7d86 0%, #1a535c 100%)";
-export const ICON_BG = "#1A535C";
-export const ICON_RGB = [0x1a, 0x53, 0x5c] as const;
+/** Цвета логотипа «Цифра» — диаграмма роста на светлом фоне */
+export const ICON_BG = "#F0F9FF";
+export const ICON_CHART = "#22A6C6";
+export const ICON_RGB = [0xf0, 0xf9, 0xff] as const;
+export const CHART_RGB = [0x22, 0xa6, 0xc6] as const;
+
+/** Для статус-бара и акцентов PWA */
+export const THEME_COLOR = "#22A6C6";

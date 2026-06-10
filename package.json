@@ -16,6 +16,7 @@
     "multi-objects-training": "node scripts/import-pozharka-article.mjs multi-objects-training \"Как выстроить систему обучения для нескольких объектов\" bazadata",
     "fire-services-bundle": "node scripts/import-pozharka-article.mjs fire-services-bundle \"Как собрать несколько услуг пожарной безопасности в один проект\" desktop",
     "evac-plan-standard": "node scripts/import-pozharka-article.mjs evac-plan-standard \"Почему одного стандартного плана эвакуации часто недостаточно\" desktop",
+    "pozharka-sources": "node scripts/list-pozharka-sources.mjs",
     "test-questions": "node scripts/sync-test-csv.mjs && npx --yes tsx scripts/export-test-bank.ts",
     "sync-test-csv": "node scripts/sync-test-csv.mjs"
   },
